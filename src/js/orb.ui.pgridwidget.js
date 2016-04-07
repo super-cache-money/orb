@@ -5,10 +5,11 @@
 
 'use strict';
 
-/* global module, require, React, window */
+/* global module, require, window */
 /*jshint eqnull: true*/
 
-var ReactDOM = typeof window === 'undefined' ? require('react-dom') : window.ReactDOM,
+var ReactDOM = require('react-dom'),
+    React = require('react'),
     axe = require('./orb.axe'),
     pgrid = require('./orb.pgrid'),
     uiheaders = require('./orb.ui.header'),
@@ -94,12 +95,12 @@ module.exports = function(config) {
             height: null
         }
     };
-    
+
     this.expandRow = function(cell) {
         cell.expand();
         this.render();
     };
-  
+
     this.collapseRow = function(cell) {
         cell.subtotalHeader.collapse();
         this.render();
@@ -131,7 +132,7 @@ module.exports = function(config) {
 
         if (axeToExpand && axeToExpand.toggleFieldExpansion(field, newState)) {
             self.render();
-        }        
+        }
     };
 
     this.toggleSubtotals = function(axetype) {
@@ -156,7 +157,7 @@ module.exports = function(config) {
 
     this.render = function(element) {
         renderElement = element || renderElement;
-        if(renderElement) {            
+        if(renderElement) {
             var pivotTableFactory = React.createFactory(
                 self.pgrid.config.chartMode.enabled ?
                     PivotChart :
@@ -195,7 +196,7 @@ module.exports = function(config) {
                 title: title,
                 comp: {
                     type: Grid,
-                    props: {                    
+                    props: {
                         headers: self.pgrid.config.getDataSourceFieldCaptions(),
                         data: data,
                         theme: self.pgrid.config.theme
@@ -206,13 +207,13 @@ module.exports = function(config) {
             });
         }
     };
-    
+
     function init() {
         self.pgrid.subscribe(pgrid.EVENT_UPDATED, buildUiAndRender);
         self.pgrid.subscribe(pgrid.EVENT_SORT_CHANGED, buildUiAndRender);
         self.pgrid.subscribe(pgrid.EVENT_CONFIG_CHANGED, buildUiAndRender);
-        
-        buildUi();  
+
+        buildUi();
     }
 
     function buildUi() {
@@ -224,7 +225,7 @@ module.exports = function(config) {
         var rowsHeaders = self.rows.headers;
         var columnsLeafHeaders = self.columns.leafsHeaders;
 
-        // set control layout infos		
+        // set control layout infos
         self.layout = {
             rowHeaders: {
                 width: (self.pgrid.rows.fields.length || 1) +
@@ -267,11 +268,11 @@ module.exports = function(config) {
         }
         self.dataRows = dataRows;
     }
-    
+
     function buildUiAndRender() {
         buildUi();
         self.render();
     }
-    
+
     init();
 };
