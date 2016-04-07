@@ -1,7 +1,7 @@
 /**
  * orb v1.1.0, Pivot table javascript library.
  *
- * Copyright (c) 2014-2015 Najmeddine Nouri <devnajm@gmail.com>.
+ * Copyright (c) 2014-2016 Najmeddine Nouri <devnajm@gmail.com>.
  *
  * @version v1.1.0
  * @link http://orbjs.net/
@@ -57,9 +57,655 @@
     return s
   })({
     1: [function(_dereq_, module, exports) {
+      module.exports = {
+        "default": _dereq_("core-js/library/fn/json/stringify"),
+        __esModule: true
+      };
+    }, {
+      "core-js/library/fn/json/stringify": 4
+    }],
+    2: [function(_dereq_, module, exports) {
+      module.exports = {
+        "default": _dereq_("core-js/library/fn/symbol"),
+        __esModule: true
+      };
+    }, {
+      "core-js/library/fn/symbol": 5
+    }],
+    3: [function(_dereq_, module, exports) {
+
+      var _Symbol = _dereq_("babel-runtime/core-js/symbol")["default"];
+
+      exports["default"] = function(obj) {
+        return obj && obj.constructor === _Symbol ? "symbol" : typeof obj;
+      };
+
+      exports.__esModule = true;
+    }, {
+      "babel-runtime/core-js/symbol": 2
+    }],
+    4: [function(_dereq_, module, exports) {
+      var core = _dereq_('../../modules/$.core');
+      module.exports = function stringify(it) { // eslint-disable-line no-unused-vars
+        return (core.JSON && core.JSON.stringify || JSON.stringify).apply(JSON, arguments);
+      };
+    }, {
+      "../../modules/$.core": 9
+    }],
+    5: [function(_dereq_, module, exports) {
+      _dereq_('../../modules/es6.symbol');
+      _dereq_('../../modules/es6.object.to-string');
+      module.exports = _dereq_('../../modules/$.core').Symbol;
+    }, {
+      "../../modules/$.core": 9,
+      "../../modules/es6.object.to-string": 33,
+      "../../modules/es6.symbol": 34
+    }],
+    6: [function(_dereq_, module, exports) {
+      module.exports = function(it) {
+        if (typeof it != 'function') throw TypeError(it + ' is not a function!');
+        return it;
+      };
+    }, {}],
+    7: [function(_dereq_, module, exports) {
+      var isObject = _dereq_('./$.is-object');
+      module.exports = function(it) {
+        if (!isObject(it)) throw TypeError(it + ' is not an object!');
+        return it;
+      };
+    }, {
+      "./$.is-object": 22
+    }],
+    8: [function(_dereq_, module, exports) {
+      var toString = {}.toString;
+
+      module.exports = function(it) {
+        return toString.call(it).slice(8, -1);
+      };
+    }, {}],
+    9: [function(_dereq_, module, exports) {
+      var core = module.exports = {
+        version: '1.2.6'
+      };
+      if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
+    }, {}],
+    10: [function(_dereq_, module, exports) {
+      // optional / simple context binding
+      var aFunction = _dereq_('./$.a-function');
+      module.exports = function(fn, that, length) {
+        aFunction(fn);
+        if (that === undefined) return fn;
+        switch (length) {
+          case 1:
+            return function(a) {
+              return fn.call(that, a);
+            };
+          case 2:
+            return function(a, b) {
+              return fn.call(that, a, b);
+            };
+          case 3:
+            return function(a, b, c) {
+              return fn.call(that, a, b, c);
+            };
+        }
+        return function() {
+          return fn.apply(that, arguments);
+        };
+      };
+    }, {
+      "./$.a-function": 6
+    }],
+    11: [function(_dereq_, module, exports) {
+      // 7.2.1 RequireObjectCoercible(argument)
+      module.exports = function(it) {
+        if (it == undefined) throw TypeError("Can't call method on  " + it);
+        return it;
+      };
+    }, {}],
+    12: [function(_dereq_, module, exports) {
+      // Thank's IE8 for his funny defineProperty
+      module.exports = !_dereq_('./$.fails')(function() {
+        return Object.defineProperty({}, 'a', {
+          get: function() {
+            return 7;
+          }
+        }).a != 7;
+      });
+    }, {
+      "./$.fails": 15
+    }],
+    13: [function(_dereq_, module, exports) {
+      // all enumerable object keys, includes symbols
+      var $ = _dereq_('./$');
+      module.exports = function(it) {
+        var keys = $.getKeys(it),
+          getSymbols = $.getSymbols;
+        if (getSymbols) {
+          var symbols = getSymbols(it),
+            isEnum = $.isEnum,
+            i = 0,
+            key;
+          while (symbols.length > i)
+            if (isEnum.call(it, key = symbols[i++])) keys.push(key);
+        }
+        return keys;
+      };
+    }, {
+      "./$": 23
+    }],
+    14: [function(_dereq_, module, exports) {
+      var global = _dereq_('./$.global'),
+        core = _dereq_('./$.core'),
+        ctx = _dereq_('./$.ctx'),
+        PROTOTYPE = 'prototype';
+
+      var $export = function(type, name, source) {
+        var IS_FORCED = type & $export.F,
+          IS_GLOBAL = type & $export.G,
+          IS_STATIC = type & $export.S,
+          IS_PROTO = type & $export.P,
+          IS_BIND = type & $export.B,
+          IS_WRAP = type & $export.W,
+          exports = IS_GLOBAL ? core : core[name] || (core[name] = {}),
+          target = IS_GLOBAL ? global : IS_STATIC ? global[name] : (global[name] || {})[PROTOTYPE],
+          key, own, out;
+        if (IS_GLOBAL) source = name;
+        for (key in source) {
+          // contains in native
+          own = !IS_FORCED && target && key in target;
+          if (own && key in exports) continue;
+          // export native or passed
+          out = own ? target[key] : source[key];
+          // prevent global pollution for namespaces
+          exports[key] = IS_GLOBAL && typeof target[key] != 'function' ? source[key]
+            // bind timers to global for call from export context
+            : IS_BIND && own ? ctx(out, global)
+            // wrap global constructors for prevent change them in library
+            : IS_WRAP && target[key] == out ? (function(C) {
+              var F = function(param) {
+                return this instanceof C ? new C(param) : C(param);
+              };
+              F[PROTOTYPE] = C[PROTOTYPE];
+              return F;
+              // make static versions for prototype methods
+            })(out) : IS_PROTO && typeof out == 'function' ? ctx(Function.call, out) : out;
+          if (IS_PROTO)(exports[PROTOTYPE] || (exports[PROTOTYPE] = {}))[key] = out;
+        }
+      };
+      // type bitmap
+      $export.F = 1; // forced
+      $export.G = 2; // global
+      $export.S = 4; // static
+      $export.P = 8; // proto
+      $export.B = 16; // bind
+      $export.W = 32; // wrap
+      module.exports = $export;
+    }, {
+      "./$.core": 9,
+      "./$.ctx": 10,
+      "./$.global": 17
+    }],
+    15: [function(_dereq_, module, exports) {
+      module.exports = function(exec) {
+        try {
+          return !!exec();
+        } catch (e) {
+          return true;
+        }
+      };
+    }, {}],
+    16: [function(_dereq_, module, exports) {
+      // fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
+      var toIObject = _dereq_('./$.to-iobject'),
+        getNames = _dereq_('./$').getNames,
+        toString = {}.toString;
+
+      var windowNames = typeof window == 'object' && Object.getOwnPropertyNames ? Object.getOwnPropertyNames(window) : [];
+
+      var getWindowNames = function(it) {
+        try {
+          return getNames(it);
+        } catch (e) {
+          return windowNames.slice();
+        }
+      };
+
+      module.exports.get = function getOwnPropertyNames(it) {
+        if (windowNames && toString.call(it) == '[object Window]') return getWindowNames(it);
+        return getNames(toIObject(it));
+      };
+    }, {
+      "./$": 23,
+      "./$.to-iobject": 30
+    }],
+    17: [function(_dereq_, module, exports) {
+      // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
+      var global = module.exports = typeof window != 'undefined' && window.Math == Math ? window : typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
+      if (typeof __g == 'number') __g = global; // eslint-disable-line no-undef
+    }, {}],
+    18: [function(_dereq_, module, exports) {
+      var hasOwnProperty = {}.hasOwnProperty;
+      module.exports = function(it, key) {
+        return hasOwnProperty.call(it, key);
+      };
+    }, {}],
+    19: [function(_dereq_, module, exports) {
+      var $ = _dereq_('./$'),
+        createDesc = _dereq_('./$.property-desc');
+      module.exports = _dereq_('./$.descriptors') ? function(object, key, value) {
+        return $.setDesc(object, key, createDesc(1, value));
+      } : function(object, key, value) {
+        object[key] = value;
+        return object;
+      };
+    }, {
+      "./$": 23,
+      "./$.descriptors": 12,
+      "./$.property-desc": 26
+    }],
+    20: [function(_dereq_, module, exports) {
+      // fallback for non-array-like ES3 and non-enumerable old V8 strings
+      var cof = _dereq_('./$.cof');
+      module.exports = Object('z').propertyIsEnumerable(0) ? Object : function(it) {
+        return cof(it) == 'String' ? it.split('') : Object(it);
+      };
+    }, {
+      "./$.cof": 8
+    }],
+    21: [function(_dereq_, module, exports) {
+      // 7.2.2 IsArray(argument)
+      var cof = _dereq_('./$.cof');
+      module.exports = Array.isArray || function(arg) {
+        return cof(arg) == 'Array';
+      };
+    }, {
+      "./$.cof": 8
+    }],
+    22: [function(_dereq_, module, exports) {
+      module.exports = function(it) {
+        return typeof it === 'object' ? it !== null : typeof it === 'function';
+      };
+    }, {}],
+    23: [function(_dereq_, module, exports) {
+      var $Object = Object;
+      module.exports = {
+        create: $Object.create,
+        getProto: $Object.getPrototypeOf,
+        isEnum: {}.propertyIsEnumerable,
+        getDesc: $Object.getOwnPropertyDescriptor,
+        setDesc: $Object.defineProperty,
+        setDescs: $Object.defineProperties,
+        getKeys: $Object.keys,
+        getNames: $Object.getOwnPropertyNames,
+        getSymbols: $Object.getOwnPropertySymbols,
+        each: [].forEach
+      };
+    }, {}],
+    24: [function(_dereq_, module, exports) {
+      var $ = _dereq_('./$'),
+        toIObject = _dereq_('./$.to-iobject');
+      module.exports = function(object, el) {
+        var O = toIObject(object),
+          keys = $.getKeys(O),
+          length = keys.length,
+          index = 0,
+          key;
+        while (length > index)
+          if (O[key = keys[index++]] === el) return key;
+      };
+    }, {
+      "./$": 23,
+      "./$.to-iobject": 30
+    }],
+    25: [function(_dereq_, module, exports) {
+      module.exports = true;
+    }, {}],
+    26: [function(_dereq_, module, exports) {
+      module.exports = function(bitmap, value) {
+        return {
+          enumerable: !(bitmap & 1),
+          configurable: !(bitmap & 2),
+          writable: !(bitmap & 4),
+          value: value
+        };
+      };
+    }, {}],
+    27: [function(_dereq_, module, exports) {
+      module.exports = _dereq_('./$.hide');
+    }, {
+      "./$.hide": 19
+    }],
+    28: [function(_dereq_, module, exports) {
+      var def = _dereq_('./$').setDesc,
+        has = _dereq_('./$.has'),
+        TAG = _dereq_('./$.wks')('toStringTag');
+
+      module.exports = function(it, tag, stat) {
+        if (it && !has(it = stat ? it : it.prototype, TAG)) def(it, TAG, {
+          configurable: true,
+          value: tag
+        });
+      };
+    }, {
+      "./$": 23,
+      "./$.has": 18,
+      "./$.wks": 32
+    }],
+    29: [function(_dereq_, module, exports) {
+      var global = _dereq_('./$.global'),
+        SHARED = '__core-js_shared__',
+        store = global[SHARED] || (global[SHARED] = {});
+      module.exports = function(key) {
+        return store[key] || (store[key] = {});
+      };
+    }, {
+      "./$.global": 17
+    }],
+    30: [function(_dereq_, module, exports) {
+      // to indexed object, toObject with fallback for non-array-like ES3 strings
+      var IObject = _dereq_('./$.iobject'),
+        defined = _dereq_('./$.defined');
+      module.exports = function(it) {
+        return IObject(defined(it));
+      };
+    }, {
+      "./$.defined": 11,
+      "./$.iobject": 20
+    }],
+    31: [function(_dereq_, module, exports) {
+      var id = 0,
+        px = Math.random();
+      module.exports = function(key) {
+        return 'Symbol('.concat(key === undefined ? '' : key, ')_', (++id + px).toString(36));
+      };
+    }, {}],
+    32: [function(_dereq_, module, exports) {
+      var store = _dereq_('./$.shared')('wks'),
+        uid = _dereq_('./$.uid'),
+        Symbol = _dereq_('./$.global').Symbol;
+      module.exports = function(name) {
+        return store[name] || (store[name] =
+          Symbol && Symbol[name] || (Symbol || uid)('Symbol.' + name));
+      };
+    }, {
+      "./$.global": 17,
+      "./$.shared": 29,
+      "./$.uid": 31
+    }],
+    33: [function(_dereq_, module, exports) {
+
+    }, {}],
+    34: [function(_dereq_, module, exports) {
+
+      // ECMAScript 6 symbols shim
+      var $ = _dereq_('./$'),
+        global = _dereq_('./$.global'),
+        has = _dereq_('./$.has'),
+        DESCRIPTORS = _dereq_('./$.descriptors'),
+        $export = _dereq_('./$.export'),
+        redefine = _dereq_('./$.redefine'),
+        $fails = _dereq_('./$.fails'),
+        shared = _dereq_('./$.shared'),
+        setToStringTag = _dereq_('./$.set-to-string-tag'),
+        uid = _dereq_('./$.uid'),
+        wks = _dereq_('./$.wks'),
+        keyOf = _dereq_('./$.keyof'),
+        $names = _dereq_('./$.get-names'),
+        enumKeys = _dereq_('./$.enum-keys'),
+        isArray = _dereq_('./$.is-array'),
+        anObject = _dereq_('./$.an-object'),
+        toIObject = _dereq_('./$.to-iobject'),
+        createDesc = _dereq_('./$.property-desc'),
+        getDesc = $.getDesc,
+        setDesc = $.setDesc,
+        _create = $.create,
+        getNames = $names.get,
+        $Symbol = global.Symbol,
+        $JSON = global.JSON,
+        _stringify = $JSON && $JSON.stringify,
+        setter = false,
+        HIDDEN = wks('_hidden'),
+        isEnum = $.isEnum,
+        SymbolRegistry = shared('symbol-registry'),
+        AllSymbols = shared('symbols'),
+        useNative = typeof $Symbol == 'function',
+        ObjectProto = Object.prototype;
+
+      // fallback for old Android, https://code.google.com/p/v8/issues/detail?id=687
+      var setSymbolDesc = DESCRIPTORS && $fails(function() {
+        return _create(setDesc({}, 'a', {
+          get: function() {
+            return setDesc(this, 'a', {
+              value: 7
+            }).a;
+          }
+        })).a != 7;
+      }) ? function(it, key, D) {
+        var protoDesc = getDesc(ObjectProto, key);
+        if (protoDesc) delete ObjectProto[key];
+        setDesc(it, key, D);
+        if (protoDesc && it !== ObjectProto) setDesc(ObjectProto, key, protoDesc);
+      } : setDesc;
+
+      var wrap = function(tag) {
+        var sym = AllSymbols[tag] = _create($Symbol.prototype);
+        sym._k = tag;
+        DESCRIPTORS && setter && setSymbolDesc(ObjectProto, tag, {
+          configurable: true,
+          set: function(value) {
+            if (has(this, HIDDEN) && has(this[HIDDEN], tag)) this[HIDDEN][tag] = false;
+            setSymbolDesc(this, tag, createDesc(1, value));
+          }
+        });
+        return sym;
+      };
+
+      var isSymbol = function(it) {
+        return typeof it == 'symbol';
+      };
+
+      var $defineProperty = function defineProperty(it, key, D) {
+        if (D && has(AllSymbols, key)) {
+          if (!D.enumerable) {
+            if (!has(it, HIDDEN)) setDesc(it, HIDDEN, createDesc(1, {}));
+            it[HIDDEN][key] = true;
+          } else {
+            if (has(it, HIDDEN) && it[HIDDEN][key]) it[HIDDEN][key] = false;
+            D = _create(D, {
+              enumerable: createDesc(0, false)
+            });
+          }
+          return setSymbolDesc(it, key, D);
+        }
+        return setDesc(it, key, D);
+      };
+      var $defineProperties = function defineProperties(it, P) {
+        anObject(it);
+        var keys = enumKeys(P = toIObject(P)),
+          i = 0,
+          l = keys.length,
+          key;
+        while (l > i) $defineProperty(it, key = keys[i++], P[key]);
+        return it;
+      };
+      var $create = function create(it, P) {
+        return P === undefined ? _create(it) : $defineProperties(_create(it), P);
+      };
+      var $propertyIsEnumerable = function propertyIsEnumerable(key) {
+        var E = isEnum.call(this, key);
+        return E || !has(this, key) || !has(AllSymbols, key) || has(this, HIDDEN) && this[HIDDEN][key] ? E : true;
+      };
+      var $getOwnPropertyDescriptor = function getOwnPropertyDescriptor(it, key) {
+        var D = getDesc(it = toIObject(it), key);
+        if (D && has(AllSymbols, key) && !(has(it, HIDDEN) && it[HIDDEN][key])) D.enumerable = true;
+        return D;
+      };
+      var $getOwnPropertyNames = function getOwnPropertyNames(it) {
+        var names = getNames(toIObject(it)),
+          result = [],
+          i = 0,
+          key;
+        while (names.length > i)
+          if (!has(AllSymbols, key = names[i++]) && key != HIDDEN) result.push(key);
+        return result;
+      };
+      var $getOwnPropertySymbols = function getOwnPropertySymbols(it) {
+        var names = getNames(toIObject(it)),
+          result = [],
+          i = 0,
+          key;
+        while (names.length > i)
+          if (has(AllSymbols, key = names[i++])) result.push(AllSymbols[key]);
+        return result;
+      };
+      var $stringify = function stringify(it) {
+        if (it === undefined || isSymbol(it)) return; // IE8 returns string on undefined
+        var args = [it],
+          i = 1,
+          $$ = arguments,
+          replacer, $replacer;
+        while ($$.length > i) args.push($$[i++]);
+        replacer = args[1];
+        if (typeof replacer == 'function') $replacer = replacer;
+        if ($replacer || !isArray(replacer)) replacer = function(key, value) {
+          if ($replacer) value = $replacer.call(this, key, value);
+          if (!isSymbol(value)) return value;
+        };
+        args[1] = replacer;
+        return _stringify.apply($JSON, args);
+      };
+      var buggyJSON = $fails(function() {
+        var S = $Symbol();
+        // MS Edge converts symbol values to JSON as {}
+        // WebKit converts symbol values to JSON as null
+        // V8 throws on boxed symbols
+        return _stringify([S]) != '[null]' || _stringify({
+          a: S
+        }) != '{}' || _stringify(Object(S)) != '{}';
+      });
+
+      // 19.4.1.1 Symbol([description])
+      if (!useNative) {
+        $Symbol = function Symbol() {
+          if (isSymbol(this)) throw TypeError('Symbol is not a constructor');
+          return wrap(uid(arguments.length > 0 ? arguments[0] : undefined));
+        };
+        redefine($Symbol.prototype, 'toString', function toString() {
+          return this._k;
+        });
+
+        isSymbol = function(it) {
+          return it instanceof $Symbol;
+        };
+
+        $.create = $create;
+        $.isEnum = $propertyIsEnumerable;
+        $.getDesc = $getOwnPropertyDescriptor;
+        $.setDesc = $defineProperty;
+        $.setDescs = $defineProperties;
+        $.getNames = $names.get = $getOwnPropertyNames;
+        $.getSymbols = $getOwnPropertySymbols;
+
+        if (DESCRIPTORS && !_dereq_('./$.library')) {
+          redefine(ObjectProto, 'propertyIsEnumerable', $propertyIsEnumerable, true);
+        }
+      }
+
+      var symbolStatics = {
+        // 19.4.2.1 Symbol.for(key)
+        'for': function(key) {
+          return has(SymbolRegistry, key += '') ? SymbolRegistry[key] : SymbolRegistry[key] = $Symbol(key);
+        },
+        // 19.4.2.5 Symbol.keyFor(sym)
+        keyFor: function keyFor(key) {
+          return keyOf(SymbolRegistry, key);
+        },
+        useSetter: function() {
+          setter = true;
+        },
+        useSimple: function() {
+          setter = false;
+        }
+      };
+      // 19.4.2.2 Symbol.hasInstance
+      // 19.4.2.3 Symbol.isConcatSpreadable
+      // 19.4.2.4 Symbol.iterator
+      // 19.4.2.6 Symbol.match
+      // 19.4.2.8 Symbol.replace
+      // 19.4.2.9 Symbol.search
+      // 19.4.2.10 Symbol.species
+      // 19.4.2.11 Symbol.split
+      // 19.4.2.12 Symbol.toPrimitive
+      // 19.4.2.13 Symbol.toStringTag
+      // 19.4.2.14 Symbol.unscopables
+      $.each.call((
+        'hasInstance,isConcatSpreadable,iterator,match,replace,search,' +
+        'species,split,toPrimitive,toStringTag,unscopables'
+      ).split(','), function(it) {
+        var sym = wks(it);
+        symbolStatics[it] = useNative ? sym : wrap(sym);
+      });
+
+      setter = true;
+
+      $export($export.G + $export.W, {
+        Symbol: $Symbol
+      });
+
+      $export($export.S, 'Symbol', symbolStatics);
+
+      $export($export.S + $export.F * !useNative, 'Object', {
+        // 19.1.2.2 Object.create(O [, Properties])
+        create: $create,
+        // 19.1.2.4 Object.defineProperty(O, P, Attributes)
+        defineProperty: $defineProperty,
+        // 19.1.2.3 Object.defineProperties(O, Properties)
+        defineProperties: $defineProperties,
+        // 19.1.2.6 Object.getOwnPropertyDescriptor(O, P)
+        getOwnPropertyDescriptor: $getOwnPropertyDescriptor,
+        // 19.1.2.7 Object.getOwnPropertyNames(O)
+        getOwnPropertyNames: $getOwnPropertyNames,
+        // 19.1.2.8 Object.getOwnPropertySymbols(O)
+        getOwnPropertySymbols: $getOwnPropertySymbols
+      });
+
+      // 24.3.2 JSON.stringify(value [, replacer [, space]])
+      $JSON && $export($export.S + $export.F * (!useNative || buggyJSON), 'JSON', {
+        stringify: $stringify
+      });
+
+      // 19.4.3.5 Symbol.prototype[@@toStringTag]
+      setToStringTag($Symbol, 'Symbol');
+      // 20.2.1.9 Math[@@toStringTag]
+      setToStringTag(Math, 'Math', true);
+      // 24.3.3 JSON[@@toStringTag]
+      setToStringTag(global.JSON, 'JSON', true);
+    }, {
+      "./$": 23,
+      "./$.an-object": 7,
+      "./$.descriptors": 12,
+      "./$.enum-keys": 13,
+      "./$.export": 14,
+      "./$.fails": 15,
+      "./$.get-names": 16,
+      "./$.global": 17,
+      "./$.has": 18,
+      "./$.is-array": 21,
+      "./$.keyof": 24,
+      "./$.library": 25,
+      "./$.property-desc": 26,
+      "./$.redefine": 27,
+      "./$.set-to-string-tag": 28,
+      "./$.shared": 29,
+      "./$.to-iobject": 30,
+      "./$.uid": 31,
+      "./$.wks": 32
+    }],
+    35: [function(_dereq_, module, exports) {
 
       var Aggregations = module.exports = {
-        toAggregateFunc: function(func) {
+        toAggregateFunc: function toAggregateFunc(func) {
           if (func) {
             if (typeof func === 'string' && Aggregations[func]) {
               return Aggregations[func];
@@ -72,17 +718,17 @@
             return Aggregations.sum;
           }
         },
-        count: function(datafield, intersection, datasource) {
+        count: function count(datafield, intersection, datasource) {
           return intersection === 'all' ? datasource.length : intersection.length;
         },
-        sum: function(datafield, intersection, datasource) {
+        sum: function sum(datafield, intersection, datasource) {
           var sum = 0;
           forEachIntersection(datafield, intersection, datasource, function(val) {
             sum += val;
           });
           return sum;
         },
-        min: function(datafield, intersection, datasource) {
+        min: function min(datafield, intersection, datasource) {
           var min = null;
           forEachIntersection(datafield, intersection, datasource, function(val) {
             if (min == null || val < min) {
@@ -91,7 +737,7 @@
           });
           return min;
         },
-        max: function(datafield, intersection, datasource) {
+        max: function max(datafield, intersection, datasource) {
           var max = null;
           forEachIntersection(datafield, intersection, datasource, function(val) {
             if (max == null || val > max) {
@@ -100,7 +746,7 @@
           });
           return max;
         },
-        avg: function(datafield, intersection, datasource) {
+        avg: function avg(datafield, intersection, datasource) {
           var avg = 0;
           var len = (intersection === 'all' ? datasource : intersection).length;
           if (len > 0) {
@@ -111,7 +757,7 @@
           }
           return avg;
         },
-        prod: function(datafield, intersection, datasource) {
+        prod: function prod(datafield, intersection, datasource) {
           var prod;
           var len = (intersection === 'all' ? datasource : intersection).length;
           if (len > 0) {
@@ -122,16 +768,16 @@
           }
           return prod;
         },
-        stdev: function(datafield, intersection, datasource) {
+        stdev: function stdev(datafield, intersection, datasource) {
           return Math.sqrt(calcVariance(datafield, intersection, datasource, false));
         },
-        stdevp: function(datafield, intersection, datasource) {
+        stdevp: function stdevp(datafield, intersection, datasource) {
           return Math.sqrt(calcVariance(datafield, intersection, datasource, true));
         },
-        'var': function(datafield, intersection, datasource) {
+        'var': function _var(datafield, intersection, datasource) {
           return calcVariance(datafield, intersection, datasource, false);
         },
-        varp: function(datafield, intersection, datasource) {
+        varp: function varp(datafield, intersection, datasource) {
           return calcVariance(datafield, intersection, datasource, true);
         }
       };
@@ -168,7 +814,7 @@
       }
 
     }, {}],
-    2: [function(_dereq_, module, exports) {
+    36: [function(_dereq_, module, exports) {
 
       var utils = _dereq_('./orb.utils');
       var Dimension = _dereq_('./orb.dimension');
@@ -193,7 +839,7 @@
           this.type = type;
 
 
-          this.fields = (function() {
+          this.fields = function() {
             switch (type) {
               case AxeType.COLUMNS:
                 return self.pgrid.config.columnFields;
@@ -204,7 +850,7 @@
               default:
                 return [];
             }
-          })();
+          }();
 
 
           this.dimensionsCount = null;
@@ -327,10 +973,10 @@
       module.exports.Type = AxeType;
 
     }, {
-      "./orb.dimension": 4,
-      "./orb.utils": 19
+      "./orb.dimension": 38,
+      "./orb.utils": 53
     }],
-    3: [function(_dereq_, module, exports) {
+    37: [function(_dereq_, module, exports) {
 
       var utils = _dereq_('./orb.utils');
       var axe = _dereq_('./orb.axe');
@@ -626,7 +1272,7 @@
 
         this.availablefields = function() {
           return self.allFields.filter(function(field) {
-            var notequalfield = function(otherfield) {
+            var notequalfield = function notequalfield(otherfield) {
               return field.name !== otherfield.name;
             };
 
@@ -802,13 +1448,13 @@
       };
 
     }, {
-      "./orb.aggregation": 1,
-      "./orb.axe": 2,
-      "./orb.filtering": 6,
-      "./orb.themes": 12,
-      "./orb.utils": 19
+      "./orb.aggregation": 35,
+      "./orb.axe": 36,
+      "./orb.filtering": 40,
+      "./orb.themes": 46,
+      "./orb.utils": 53
     }],
-    4: [function(_dereq_, module, exports) {
+    38: [function(_dereq_, module, exports) {
 
       module.exports = function(id, parent, value, field, depth, isRoot, isLeaf) {
 
@@ -853,7 +1499,7 @@
       };
 
     }, {}],
-    5: [function(_dereq_, module, exports) {
+    39: [function(_dereq_, module, exports) {
 
       var utils = _dereq_('./orb.utils');
       var uiheaders = _dereq_('./orb.ui.header');
@@ -907,7 +1553,7 @@
 
         var columnFields = createButtons(config.columnFields, pgridwidget.layout.rowHeaders.width, cellsHorizontalCount - (pgridwidget.layout.rowHeaders.width + config.columnFields.length));
 
-        var columnHeaders = (function() {
+        var columnHeaders = function() {
           var str = '';
           var j;
           for (var i = 0; i < pgridwidget.columns.headers.length; i++) {
@@ -930,9 +1576,9 @@
             str += rowStr + '</tr>';
           }
           return str;
-        })();
+        }();
 
-        var rowHeadersAndDataCells = (function() {
+        var rowHeadersAndDataCells = function() {
           var str = '';
           var j;
           for (var i = 0; i < pgridwidget.rows.headers.length; i++) {
@@ -950,7 +1596,7 @@
             str += rowStr + '</tr>';
           }
           return str;
-        })();
+        }();
 
         function toBase64(str) {
           return utils.btoa(unescape(encodeURIComponent(str)));
@@ -960,11 +1606,11 @@
       };
 
     }, {
-      "./orb.themes": 12,
-      "./orb.ui.header": 15,
-      "./orb.utils": 19
+      "./orb.themes": 46,
+      "./orb.ui.header": 49,
+      "./orb.utils": 53
     }],
-    6: [function(_dereq_, module, exports) {
+    40: [function(_dereq_, module, exports) {
 
       var utils = _dereq_('./orb.utils');
 
@@ -1013,7 +1659,7 @@
       };
 
       var ops = filtering.Operators = {
-        get: function(opname) {
+        get: function get(opname) {
           switch (opname) {
             case ops.MATCH.name:
               return ops.MATCH;
@@ -1038,7 +1684,7 @@
         NONE: null,
         MATCH: {
           name: 'Matches',
-          func: function(value, term) {
+          func: function func(value, term) {
             if (value) {
               return value.toString().search(utils.isRegExp(term) ? term : new RegExp(term, 'i')) >= 0;
             } else {
@@ -1049,7 +1695,7 @@
         },
         NOTMATCH: {
           name: 'Does Not Match',
-          func: function(value, term) {
+          func: function func(value, term) {
             if (value) {
               return value.toString().search(utils.isRegExp(term) ? term : new RegExp(term, 'i')) < 0;
             } else {
@@ -1060,42 +1706,42 @@
         },
         EQ: {
           name: '=',
-          func: function(value, term) {
+          func: function func(value, term) {
             return value == term;
           },
           regexpSupported: false
         },
         NEQ: {
           name: '<>',
-          func: function(value, term) {
+          func: function func(value, term) {
             return value != term;
           },
           regexpSupported: false
         },
         GT: {
           name: '>',
-          func: function(value, term) {
+          func: function func(value, term) {
             return value > term;
           },
           regexpSupported: false
         },
         GTE: {
           name: '>=',
-          func: function(value, term) {
+          func: function func(value, term) {
             return value >= term;
           },
           regexpSupported: false
         },
         LT: {
           name: '<',
-          func: function(value, term) {
+          func: function func(value, term) {
             return value < term;
           },
           regexpSupported: false
         },
         LTE: {
           name: '<=',
-          func: function(value, term) {
+          func: function func(value, term) {
             return value <= term;
           },
           regexpSupported: false
@@ -1103,9 +1749,9 @@
       };
 
     }, {
-      "./orb.utils": 19
+      "./orb.utils": 53
     }],
-    7: [function(_dereq_, module, exports) {
+    41: [function(_dereq_, module, exports) {
 
       module.exports.utils = _dereq_('./orb.utils');
       module.exports.pgrid = _dereq_('./orb.pgrid');
@@ -1114,13 +1760,13 @@
       module.exports['export'] = _dereq_('./orb.export.excel');
 
     }, {
-      "./orb.export.excel": 5,
-      "./orb.pgrid": 8,
-      "./orb.query": 10,
-      "./orb.ui.pgridwidget": 16,
-      "./orb.utils": 19
+      "./orb.export.excel": 39,
+      "./orb.pgrid": 42,
+      "./orb.query": 44,
+      "./orb.ui.pgridwidget": 50,
+      "./orb.utils": 53
     }],
-    8: [function(_dereq_, module, exports) {
+    42: [function(_dereq_, module, exports) {
 
       var PubSub = _dereq_('./orb.pubsub'),
         axe = _dereq_('./orb.axe'),
@@ -1527,14 +2173,14 @@
       pgrid.EVENT_CONFIG_CHANGED = 'pgrid:config-changed';
 
     }, {
-      "./orb.axe": 2,
-      "./orb.config": 3,
-      "./orb.filtering": 6,
-      "./orb.pubsub": 9,
-      "./orb.query": 10,
-      "./orb.utils": 19
+      "./orb.axe": 36,
+      "./orb.config": 37,
+      "./orb.filtering": 40,
+      "./orb.pubsub": 43,
+      "./orb.query": 44,
+      "./orb.utils": 53
     }],
-    9: [function(_dereq_, module, exports) {
+    43: [function(_dereq_, module, exports) {
 
       var utils = _dereq_('./orb.utils');
 
@@ -1558,15 +2204,25 @@
       };
 
     }, {
-      "./orb.utils": 19
+      "./orb.utils": 53
     }],
-    10: [function(_dereq_, module, exports) {
+    44: [function(_dereq_, module, exports) {
+
+      var _typeof2 = _dereq_('babel-runtime/helpers/typeof');
+
+      var _typeof3 = _interopRequireDefault(_typeof2);
+
+      function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+          default: obj
+        };
+      }
 
       var utils = _dereq_('./orb.utils');
       var axe = _dereq_('./orb.axe');
       var aggregation = _dereq_('./orb.aggregation');
 
-      var queryBase = function(source, query, filters) {
+      var queryBase = function queryBase(source, query, filters) {
 
         var self = this;
 
@@ -1618,7 +2274,7 @@
         };
       };
 
-      var pgridQuery = function(pgrid) {
+      var pgridQuery = function pgridQuery(pgrid) {
 
         queryBase.call(this, pgrid, {}, {});
 
@@ -1634,7 +2290,7 @@
           };
 
           if (outerArgs.multi === true) {
-            if (options && typeof options === 'object') {
+            if (options && (typeof options === 'undefined' ? 'undefined' : (0, _typeof3.default)(options)) === 'object') {
               opts.aggregateFunc = options.aggregateFunc;
               opts.multiFieldNames = options.fields;
             } else {
@@ -1769,7 +2425,7 @@
         };
       };
 
-      var arrayQuery = function(array) {
+      var arrayQuery = function arrayQuery(array) {
 
         queryBase.call(this, array, {}, []);
 
@@ -1790,7 +2446,7 @@
           };
 
           if (outerArgs.multi === true) {
-            if (options && typeof options === 'object') {
+            if (options && (typeof options === 'undefined' ? 'undefined' : (0, _typeof3.default)(options)) === 'object') {
               opts.aggregateFunc = options.aggregateFunc;
               opts.multiFieldNames = options.fields;
             } else {
@@ -1900,11 +2556,12 @@
       };
 
     }, {
-      "./orb.aggregation": 1,
-      "./orb.axe": 2,
-      "./orb.utils": 19
+      "./orb.aggregation": 35,
+      "./orb.axe": 36,
+      "./orb.utils": 53,
+      "babel-runtime/helpers/typeof": 3
     }],
-    11: [function(_dereq_, module, exports) {
+    45: [function(_dereq_, module, exports) {
 
       module.exports = function() {
         var states = {};
@@ -1919,9 +2576,9 @@
       };
 
     }, {}],
-    12: [function(_dereq_, module, exports) {
+    46: [function(_dereq_, module, exports) {
 
-      module.exports = (function() {
+      module.exports = function() {
 
         var currentTheme = 'blue';
         var themeManager = {};
@@ -2007,7 +2664,7 @@
         };
 
         var utils = themeManager.utils = {
-          hexToRgb: function(hex) {
+          hexToRgb: function hexToRgb(hex) {
             var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return result ? {
               r: parseInt(result[1], 16),
@@ -2015,7 +2672,7 @@
               b: parseInt(result[3], 16)
             } : null;
           },
-          rgbaToHex: function(rgba) {
+          rgbaToHex: function rgbaToHex(rgba) {
             var matches = rgba.match(/rgba\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+(?:\.\d+)?)\s*\)/);
             if (matches) {
               var alpha = parseFloat(matches[4]);
@@ -2023,7 +2680,7 @@
             }
             return null;
           },
-          rgbaToHexA: function(rgba) {
+          rgbaToHexA: function rgbaToHexA(rgba) {
             var matches = rgba.match(/rgba\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+(?:\.\d+)?)\s*\)/);
             if (matches) {
               var alpha = parseFloat(matches[4]);
@@ -2031,20 +2688,20 @@
             }
             return null;
           },
-          applyAlphaAndToHex: function(value, alpha) {
+          applyAlphaAndToHex: function applyAlphaAndToHex(value, alpha) {
             return (Math.floor(alpha * parseInt(value) + (1 - alpha) * 255) + 256).toString(16).substr(1, 2);
           },
-          fadeoutColor: function(color, alpha) {
+          fadeoutColor: function fadeoutColor(color, alpha) {
             color = utils.hexToRgb(color);
             return '#' + utils.applyAlphaAndToHex(color.r, alpha) + utils.applyAlphaAndToHex(color.g, alpha) + utils.applyAlphaAndToHex(color.b, alpha);
           }
         };
 
         return themeManager;
-      })();
+      }();
 
     }, {}],
-    13: [function(_dereq_, module, exports) {
+    47: [function(_dereq_, module, exports) {
 
       var axe = _dereq_('./orb.axe');
       var uiheaders = _dereq_('./orb.ui.header');
@@ -2102,10 +2759,10 @@
       };
 
     }, {
-      "./orb.axe": 2,
-      "./orb.ui.header": 15
+      "./orb.axe": 36,
+      "./orb.ui.header": 49
     }],
-    14: [function(_dereq_, module, exports) {
+    48: [function(_dereq_, module, exports) {
 
       var axe = _dereq_('./orb.axe');
       var axeUi = _dereq_('./orb.ui.axe');
@@ -2257,11 +2914,11 @@
       };
 
     }, {
-      "./orb.axe": 2,
-      "./orb.ui.axe": 13,
-      "./orb.ui.header": 15
+      "./orb.axe": 36,
+      "./orb.ui.axe": 47,
+      "./orb.ui.header": 49
     }],
-    15: [function(_dereq_, module, exports) {
+    49: [function(_dereq_, module, exports) {
 
       var axe = _dereq_('./orb.axe'),
         state = new(_dereq_('./orb.state'))();
@@ -2275,7 +2932,7 @@
         WRAPPER: 6,
         SUB_TOTAL: 7,
         GRAND_TOTAL: 8,
-        getHeaderClass: function(headerType, axetype) {
+        getHeaderClass: function getHeaderClass(headerType, axetype) {
           var cssclass = axetype === axe.Type.ROWS ? 'header-row' : axetype === axe.Type.COLUMNS ? 'header-col' : '';
           switch (headerType) {
             case HeaderType.EMPTY:
@@ -2298,7 +2955,7 @@
 
           return cssclass;
         },
-        getCellClass: function(rowHeaderType, colHeaderType) {
+        getCellClass: function getCellClass(rowHeaderType, colHeaderType) {
           var cssclass = '';
           switch (rowHeaderType) {
             case HeaderType.GRAND_TOTAL:
@@ -2529,7 +3186,7 @@
         });
       };
 
-      module.exports.emptyCell = function(hspan, vspan) {
+      module.exports.emptyCell = function(_hspan, _vspan) {
 
         CellBase.call(this, {
           axetype: null,
@@ -2537,22 +3194,23 @@
           template: 'cell-template-empty',
           value: null,
           cssclass: HeaderType.getHeaderClass(HeaderType.EMPTY),
-          hspan: function() {
-            return hspan;
+          hspan: function hspan() {
+            return _hspan;
           },
-          vspan: function() {
-            return vspan;
+          vspan: function vspan() {
+            return _vspan;
           }
         });
       };
 
     }, {
-      "./orb.axe": 2,
-      "./orb.state": 11
+      "./orb.axe": 36,
+      "./orb.state": 45
     }],
-    16: [function(_dereq_, module, exports) {
+    50: [function(_dereq_, module, exports) {
 
-      var ReactDOM = typeof window === 'undefined' ? _dereq_('react-dom') : window.ReactDOM,
+      var ReactDOM = _dereq_('react-dom'),
+        React = _dereq_('react'),
         axe = _dereq_('./orb.axe'),
         pgrid = _dereq_('./orb.pgrid'),
         uiheaders = _dereq_('./orb.ui.header'),
@@ -2723,7 +3381,7 @@
           var rowsHeaders = self.rows.headers;
           var columnsLeafHeaders = self.columns.leafsHeaders;
 
-          // set control layout infos		
+          // set control layout infos
           self.layout = {
             rowHeaders: {
               width: (self.pgrid.rows.fields.length || 1) + (self.pgrid.config.dataHeadersLocation === 'rows' && self.pgrid.config.dataFieldsCount > 1 ? 1 : 0),
@@ -2774,18 +3432,19 @@
       };
 
     }, {
-      "./orb.axe": 2,
-      "./orb.pgrid": 8,
-      "./orb.ui.cols": 14,
-      "./orb.ui.header": 15,
-      "./orb.ui.rows": 17,
-      "./react/orb.react.Dialog.jsx": 21,
-      "./react/orb.react.Grid.jsx": 28,
-      "./react/orb.react.PivotChart.jsx": 31,
-      "./react/orb.react.PivotTable.jsx": 40,
+      "./orb.axe": 36,
+      "./orb.pgrid": 42,
+      "./orb.ui.cols": 48,
+      "./orb.ui.header": 49,
+      "./orb.ui.rows": 51,
+      "./react/orb.react.Dialog.jsx": 55,
+      "./react/orb.react.Grid.jsx": 62,
+      "./react/orb.react.PivotChart.jsx": 65,
+      "./react/orb.react.PivotTable.jsx": 74,
+      "react": "react",
       "react-dom": "react-dom"
     }],
-    17: [function(_dereq_, module, exports) {
+    51: [function(_dereq_, module, exports) {
 
       var axe = _dereq_('./orb.axe');
       var axeUi = _dereq_('./orb.ui.axe');
@@ -2890,11 +3549,11 @@
       };
 
     }, {
-      "./orb.axe": 2,
-      "./orb.ui.axe": 13,
-      "./orb.ui.header": 15
+      "./orb.axe": 36,
+      "./orb.ui.axe": 47,
+      "./orb.ui.header": 49
     }],
-    18: [function(_dereq_, module, exports) {
+    52: [function(_dereq_, module, exports) {
 
       module.exports.removeClass = function(element, classname) {
         if (element && classname) {
@@ -2972,13 +3631,13 @@
           var currStyle, f, fixProp;
           if (element.currentStyle) {
             currStyle = element.currentStyle;
-            f = function(prop) {
+            f = function f(prop) {
               return currStyle[prop];
             };
             fixProp = true;
           } else if (window && window.getComputedStyle) {
             currStyle = window.getComputedStyle(element, null);
-            f = function(prop) {
+            f = function f(prop) {
               return currStyle.getPropertyValue(prop);
             };
           }
@@ -3019,12 +3678,22 @@
       };
 
     }, {}],
-    19: [function(_dereq_, module, exports) {
+    53: [function(_dereq_, module, exports) {
       (function(global) {
+
+        var _stringify = _dereq_('babel-runtime/core-js/json/stringify');
+
+        var _stringify2 = _interopRequireDefault(_stringify);
+
+        function _interopRequireDefault(obj) {
+          return obj && obj.__esModule ? obj : {
+            default: obj
+          };
+        }
 
         module.exports = {
 
-          ns: function(identifier, parent) {
+          ns: function ns(identifier, parent) {
             var parts = identifier.split('.');
             var i = 0;
             parent = parent || window;
@@ -3036,7 +3705,7 @@
             return parent;
           },
 
-          ownProperties: function(obj) {
+          ownProperties: function ownProperties(obj) {
             var arr = [];
             for (var prop in obj) {
               if (obj.hasOwnProperty(prop)) {
@@ -3046,7 +3715,7 @@
             return arr;
           },
 
-          forEach: function(list, callback, forceContinue) {
+          forEach: function forEach(list, callback, forceContinue) {
             var ret;
             if (list) {
               for (var i = 0, l = list.length; i < l; i++) {
@@ -3059,35 +3728,35 @@
             return ret;
           },
 
-          isArray: function(obj) {
+          isArray: function isArray(obj) {
             return Object.prototype.toString.apply(obj) === '[object Array]';
           },
 
-          isNumber: function(obj) {
+          isNumber: function isNumber(obj) {
             return Object.prototype.toString.apply(obj) === '[object Number]';
           },
 
-          isDate: function(obj) {
+          isDate: function isDate(obj) {
             return Object.prototype.toString.apply(obj) === '[object Date]';
           },
 
-          isString: function(obj) {
+          isString: function isString(obj) {
             return Object.prototype.toString.apply(obj) === '[object String]';
           },
 
-          isRegExp: function(obj) {
+          isRegExp: function isRegExp(obj) {
             return Object.prototype.toString.apply(obj) === '[object RegExp]';
           },
 
-          isFunction: function(obj) {
+          isFunction: function isFunction(obj) {
             return Object.prototype.toString.apply(obj) === '[object Function]';
           },
 
-          escapeRegex: function(re) {
+          escapeRegex: function escapeRegex(re) {
             return re.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
           },
 
-          findInArray: function(array, predicate) {
+          findInArray: function findInArray(array, predicate) {
             if (this.isArray(array) && predicate) {
               for (var i = 0; i < array.length; i++) {
                 var item = array[i];
@@ -3099,13 +3768,13 @@
             return undefined;
           },
 
-          jsonStringify: function(obj, censorKeywords) {
+          jsonStringify: function jsonStringify(obj, censorKeywords) {
             function censor(key, value) {
               return censorKeywords && censorKeywords.indexOf(key) > -1 ? undefined : value;
             }
-            return JSON.stringify(obj, censor, 2);
+            return (0, _stringify2.default)(obj, censor, 2);
           },
-          addEventListener: function(element, eventName, handler) {
+          addEventListener: function addEventListener(element, eventName, handler) {
             if (element.addEventListener) {
               element.addEventListener(eventName, handler, false);
             } else if (element.attachEvent) {
@@ -3114,7 +3783,7 @@
               element["on" + eventName] = handler;
             }
           },
-          removeEventListener: function(element, eventName, handler) {
+          removeEventListener: function removeEventListener(element, eventName, handler) {
             if (element.removeEventListener) {
               element.removeEventListener(eventName, handler, false);
             } else if (element.detachEvent) {
@@ -3123,7 +3792,7 @@
               element["on" + eventName] = null;
             }
           },
-          preventDefault: function(e) {
+          preventDefault: function preventDefault(e) {
             e = e || window.event;
 
             if (e.preventDefault) {
@@ -3132,7 +3801,7 @@
               e.returnValue = false;
             }
           },
-          stopPropagation: function(e) {
+          stopPropagation: function stopPropagation(e) {
             e = e || window.event;
 
             if (e.stopPropagation) {
@@ -3141,7 +3810,7 @@
               e.cancelBubble = true;
             }
           },
-          getEventButton: function(e) {
+          getEventButton: function getEventButton(e) {
             var button = e.button;
             if ('which' in e) {
               return button;
@@ -3151,7 +3820,7 @@
               button === 4 ? 1 : // middle
               2; // right
           },
-          getMousePageXY: function(e) {
+          getMousePageXY: function getMousePageXY(e) {
             e = e || window.event;
 
             var pageX = e.pageX;
@@ -3228,24 +3897,26 @@
         })(module.exports);
 
       }).call(this, typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-    }, {}],
-    20: [function(_dereq_, module, exports) {
+    }, {
+      "babel-runtime/core-js/json/stringify": 1
+    }],
+    54: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
-        ReactDOM = typeof window === 'undefined' ? _dereq_('react-dom') : window.ReactDOM;
+      var React = _dereq_('react'),
+        ReactDOM = _dereq_('react-dom');
 
       module.exports = React.createClass({
         displayName: 'exports',
 
-        getInitialState: function() {
+        getInitialState: function getInitialState() {
           return {
             canRender: false
           };
         },
-        canRender: function() {
+        canRender: function canRender() {
           return this.state.canRender && typeof this.props.chartMode.type === 'string' && typeof google.visualization[this.props.chartMode.type] === 'function';
         },
-        drawChart: function() {
+        drawChart: function drawChart() {
           if (this.canRender()) {
             var chartData = this.props.pivotTableComp.pgridwidget.pgrid.getChartData();
             var data = new google.visualization.DataTable();
@@ -3276,13 +3947,13 @@
             }
           }
         },
-        componentDidMount: function() {
+        componentDidMount: function componentDidMount() {
           this.drawChart();
         },
-        componentDidUpdate: function() {
+        componentDidUpdate: function componentDidUpdate() {
           this.drawChart();
         },
-        render: function() {
+        render: function render() {
           if (this.canRender()) {
             return React.createElement('div', {
               className: 'chart',
@@ -3297,10 +3968,10 @@
       "react": "react",
       "react-dom": "react-dom"
     }],
-    21: [function(_dereq_, module, exports) {
+    55: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
-        ReactDOM = typeof window === 'undefined' ? _dereq_('react-dom') : window.ReactDOM,
+      var React = _dereq_('react'),
+        ReactDOM = _dereq_('react-dom'),
         utils = _dereq_('../orb.utils');
 
       function createOverlay() {
@@ -3314,22 +3985,22 @@
         displayName: 'exports',
 
         statics: {
-          create: function() {
+          create: function create() {
             var dialogFactory = React.createFactory(Dialog);
             var overlay = createOverlay();
 
             return {
-              show: function(props) {
+              show: function show(props) {
                 ReactDOM.render(dialogFactory(props), overlay);
               }
             };
           }
         },
         overlayElement: null,
-        setOverlayClass: function(visible) {
+        setOverlayClass: function setOverlayClass(visible) {
           this.overlayElement.className = this.props.theme.getDialogClasses(visible).overlay;
         },
-        componentDidMount: function() {
+        componentDidMount: function componentDidMount() {
           this.overlayElement = ReactDOM.findDOMNode(this).parentNode;
           this.setOverlayClass(true);
           utils.addEventListener(this.overlayElement, 'click', this.close);
@@ -3350,7 +4021,7 @@
           dialogBodyElement.style.width = dWidth + 'px';
           dialogBodyElement.style.height = dHeight - 45 + 'px';
         },
-        close: function(e) {
+        close: function close(e) {
           var target = e.target || e.srcElement;
           if (target == this.overlayElement || target.className === 'button-close') {
             utils.removeEventListener(this.overlayElement, 'click', this.close);
@@ -3358,7 +4029,7 @@
             this.setOverlayClass(false);
           }
         },
-        render: function() {
+        render: function render() {
           if (this.props.comp) {
             var comp = React.createElement(this.props.comp.type, this.props.comp.props);
             var classes = this.props.theme.getDialogClasses();
@@ -3400,16 +4071,16 @@
       });
 
     }, {
-      "../orb.utils": 19,
+      "../orb.utils": 53,
       "react": "react",
       "react-dom": "react-dom"
     }],
-    22: [function(_dereq_, module, exports) {
+    56: [function(_dereq_, module, exports) {
 
-      var ReactDOM = typeof window === 'undefined' ? _dereq_('react-dom') : window.ReactDOM,
+      var ReactDOM = _dereq_('react-dom'),
         utils = _dereq_('../orb.utils');
 
-      var dragManager = module.exports = (function() {
+      module.exports = function() {
 
         var _pivotComp = null;
 
@@ -3484,11 +4155,11 @@
         var _initialized = false;
 
         return {
-          init: function(pivotComp) {
+          init: function init(pivotComp) {
             _initialized = true;
             _pivotComp = pivotComp;
           },
-          setDragElement: function(elem) {
+          setDragElement: function setDragElement(elem) {
 
             var prevDragElement = _currDragElement;
             _currDragElement = elem;
@@ -3508,7 +4179,7 @@
               }
             }
           },
-          registerTarget: function(target, axetype, dragOverHandler, dargEndHandler) {
+          registerTarget: function registerTarget(target, axetype, dragOverHandler, dargEndHandler) {
             _dropTargets.push({
               component: target,
               axetype: axetype,
@@ -3516,7 +4187,7 @@
               onDragEnd: dargEndHandler
             });
           },
-          unregisterTarget: function(target) {
+          unregisterTarget: function unregisterTarget(target) {
             var tindex;
             for (var i = 0; i < _dropTargets.length; i++) {
               if (_dropTargets[i].component == target) {
@@ -3528,7 +4199,7 @@
               _dropTargets.splice(tindex, 1);
             }
           },
-          registerIndicator: function(indicator, axetype, position, dragOverHandler, dargEndHandler) {
+          registerIndicator: function registerIndicator(indicator, axetype, position, dragOverHandler, dargEndHandler) {
             _dropIndicators.push({
               component: indicator,
               axetype: axetype,
@@ -3537,7 +4208,7 @@
               onDragEnd: dargEndHandler
             });
           },
-          unregisterIndicator: function(indicator) {
+          unregisterIndicator: function unregisterIndicator(indicator) {
             var iindex;
             for (var i = 0; i < _dropIndicators.length; i++) {
               if (_dropIndicators[i].component == indicator) {
@@ -3549,7 +4220,7 @@
               _dropIndicators.splice(iindex, 1);
             }
           },
-          elementMoved: function() {
+          elementMoved: function elementMoved() {
             if (_currDragElement != null) {
               var dragNodeRect = _dragNode.getBoundingClientRect();
               var foundTarget;
@@ -3599,29 +4270,29 @@
             }
           }
         };
-      })();
+      }();
 
     }, {
-      "../orb.utils": 19,
+      "../orb.utils": 53,
       "react-dom": "react-dom"
     }],
-    23: [function(_dereq_, module, exports) {
+    57: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
+      var React = _dereq_('react'),
         DragManager = _dereq_('./orb.react.DragManager.jsx');
 
       module.exports = React.createClass({
         displayName: 'DropIndicator',
-        getInitialState: function() {
+        getInitialState: function getInitialState() {
           DragManager.registerIndicator(this, this.props.axetype, this.props.position, this.onDragOver, this.onDragEnd);
           return {
             isover: false
           };
         },
-        componentWillUnmount: function() {
+        componentWillUnmount: function componentWillUnmount() {
           DragManager.unregisterIndicator(this);
         },
-        onDragOver: function(callback) {
+        onDragOver: function onDragOver(callback) {
           if (this.isMounted()) {
             this.setState({
               isover: true
@@ -3630,7 +4301,7 @@
             callback();
           }
         },
-        onDragEnd: function(callback) {
+        onDragEnd: function onDragEnd(callback) {
           if (this.isMounted()) {
             this.setState({
               isover: false
@@ -3639,7 +4310,7 @@
             callback();
           }
         },
-        render: function() {
+        render: function render() {
           var classname = 'drp-indic' + (this.props.isVertical ? '-vertical' : '');
 
           if (this.props.isFirst) {
@@ -3663,12 +4334,12 @@
       });
 
     }, {
-      "./orb.react.DragManager.jsx": 22,
+      "./orb.react.DragManager.jsx": 56,
       "react": "react"
     }],
-    24: [function(_dereq_, module, exports) {
+    58: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
+      var React = _dereq_('react'),
         DragManager = _dereq_('./orb.react.DragManager.jsx'),
         DropIndicator = _dereq_('./orb.react.DropIndicator.jsx'),
         axe = _dereq_('../orb.axe'),
@@ -3677,19 +4348,19 @@
       module.exports = React.createClass({
         displayName: 'exports',
 
-        getInitialState: function() {
+        getInitialState: function getInitialState() {
           this.dtid = ++dtid;
           return {
             isover: false
           };
         },
-        componentDidMount: function() {
+        componentDidMount: function componentDidMount() {
           DragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
         },
-        componentWillUnmount: function() {
+        componentWillUnmount: function componentWillUnmount() {
           DragManager.unregisterTarget(this);
         },
-        onDragOver: function(callback) {
+        onDragOver: function onDragOver(callback) {
           if (this.isMounted()) {
             this.setState({
               isover: true
@@ -3698,7 +4369,7 @@
             callback();
           }
         },
-        onDragEnd: function(callback) {
+        onDragEnd: function onDragEnd(callback) {
           if (this.isMounted()) {
             this.setState({
               isover: false
@@ -3707,7 +4378,7 @@
             callback();
           }
         },
-        render: function() {
+        render: function render() {
           var self = this;
 
           var buttons = this.props.buttons.map(function(button, index) {
@@ -3779,14 +4450,14 @@
       });
 
     }, {
-      "../orb.axe": 2,
-      "./orb.react.DragManager.jsx": 22,
-      "./orb.react.DropIndicator.jsx": 23,
+      "../orb.axe": 36,
+      "./orb.react.DragManager.jsx": 56,
+      "./orb.react.DropIndicator.jsx": 57,
       "react": "react"
     }],
-    25: [function(_dereq_, module, exports) {
+    59: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
+      var React = _dereq_('react'),
         DragManager = _dereq_('./orb.react.DragManager.jsx'),
         DropIndicator = _dereq_('./orb.react.DropIndicator.jsx'),
         dtid = 0;
@@ -3794,19 +4465,19 @@
       module.exports = React.createClass({
         displayName: 'exports',
 
-        getInitialState: function() {
+        getInitialState: function getInitialState() {
           this.dtid = ++dtid;
           return {
             isover: false
           };
         },
-        componentDidMount: function() {
+        componentDidMount: function componentDidMount() {
           DragManager.registerTarget(this, this.props.axetype, this.onDragOver, this.onDragEnd);
         },
-        componentWillUnmount: function() {
+        componentWillUnmount: function componentWillUnmount() {
           DragManager.unregisterTarget(this);
         },
-        onDragOver: function(callback) {
+        onDragOver: function onDragOver(callback) {
           if (this.isMounted()) {
             this.setState({
               isover: true
@@ -3815,7 +4486,7 @@
             callback();
           }
         },
-        onDragEnd: function(callback) {
+        onDragEnd: function onDragEnd(callback) {
           if (this.isMounted()) {
             this.setState({
               isover: false
@@ -3824,7 +4495,7 @@
             callback();
           }
         },
-        render: function() {
+        render: function render() {
           var self = this;
 
           var buttons = this.props.buttons.map(function(button, index) {
@@ -3889,19 +4560,19 @@
       });
 
     }, {
-      "./orb.react.DragManager.jsx": 22,
-      "./orb.react.DropIndicator.jsx": 23,
+      "./orb.react.DragManager.jsx": 56,
+      "./orb.react.DropIndicator.jsx": 57,
       "react": "react"
     }],
-    26: [function(_dereq_, module, exports) {
+    60: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
+      var React = _dereq_('react'),
         utils = _dereq_('../orb.utils');
 
       module.exports = React.createClass({
         displayName: 'exports',
 
-        openOrClose: function(e) {
+        openOrClose: function openOrClose(e) {
           var valueNode = this.refs.valueElement;
           var valuesListNode = this.refs.valuesList;
           var target = e.target || e.srcElement;
@@ -3912,21 +4583,21 @@
             valuesListNode.style.display = 'none';
           }
         },
-        onMouseEnter: function() {
+        onMouseEnter: function onMouseEnter() {
           var valueNode = this.refs.valueElement;
           valueNode.className = "orb-tgl-btn-down";
           valueNode.style.backgroundPosition = 'right center';
         },
-        onMouseLeave: function() {
+        onMouseLeave: function onMouseLeave() {
           this.refs.valueElement.className = "";
         },
-        componentDidMount: function() {
+        componentDidMount: function componentDidMount() {
           utils.addEventListener(document, 'click', this.openOrClose);
         },
-        componentWillUnmount: function() {
+        componentWillUnmount: function componentWillUnmount() {
           utils.removeEventListener(document, 'click', this.openOrClose);
         },
-        selectValue: function(e) {
+        selectValue: function selectValue(e) {
           var listNode = this.refs.valuesList;
           var target = e.target || e.srcElement;
           var isli = false;
@@ -3949,7 +4620,7 @@
             }
           }
         },
-        render: function() {
+        render: function render() {
           function createSelectValueFunc(value) {
             return function() {
               this.selectValue(value);
@@ -3993,13 +4664,13 @@
       });
 
     }, {
-      "../orb.utils": 19,
+      "../orb.utils": 53,
       "react": "react"
     }],
-    27: [function(_dereq_, module, exports) {
+    61: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
-        ReactDOM = typeof window === 'undefined' ? _dereq_('react-dom') : window.ReactDOM,
+      var React = _dereq_('react'),
+        ReactDOM = _dereq_('react-dom'),
         Dropdown = _dereq_('./orb.react.Dropdown.jsx'),
         utils = _dereq_('../orb.utils'),
         filtering = _dereq_('../orb.filtering'),
@@ -4011,20 +4682,20 @@
         pgridwidget: null,
         values: null,
         filterManager: null,
-        getInitialState: function() {
+        getInitialState: function getInitialState() {
           this.pgridwidget = this.props.pivotTableComp.pgridwidget;
           return {};
         },
-        destroy: function() {
+        destroy: function destroy() {
           var container = ReactDOM.findDOMNode(this).parentNode;
           ReactDOM.unmountComponentAtNode(container);
           container.parentNode.removeChild(container);
         },
-        onFilter: function(operator, term, staticValue, excludeStatic) {
+        onFilter: function onFilter(operator, term, staticValue, excludeStatic) {
           this.props.pivotTableComp.applyFilter(this.props.field, operator, term, staticValue, excludeStatic);
           this.destroy();
         },
-        onMouseDown: function(e) {
+        onMouseDown: function onMouseDown(e) {
           var container = ReactDOM.findDOMNode(this).parentNode;
           var target = e.target || e.srcElement;
           while (target != null) {
@@ -4036,7 +4707,7 @@
 
           this.destroy();
         },
-        onMouseWheel: function(e) {
+        onMouseWheel: function onMouseWheel(e) {
           var valuesTable = this.refs.valuesTable;
           var target = e.target || e.srcElement;
           while (target != null) {
@@ -4052,20 +4723,20 @@
 
           this.destroy();
         },
-        componentWillMount: function() {
+        componentWillMount: function componentWillMount() {
           utils.addEventListener(document, 'mousedown', this.onMouseDown);
           utils.addEventListener(document, 'wheel', this.onMouseWheel);
           utils.addEventListener(window, 'resize', this.destroy);
         },
-        componentDidMount: function() {
+        componentDidMount: function componentDidMount() {
           this.filterManager.init(ReactDOM.findDOMNode(this));
         },
-        componentWillUnmount: function() {
+        componentWillUnmount: function componentWillUnmount() {
           utils.removeEventListener(document, 'mousedown', this.onMouseDown);
           utils.removeEventListener(document, 'wheel', this.onMouseWheel);
           utils.removeEventListener(window, 'resize', this.destroy);
         },
-        render: function() {
+        render: function render() {
           var checkboxes = [];
 
           this.filterManager = new FilterManager(this, this.pgridwidget.pgrid.getFieldFilter(this.props.field));
@@ -4611,22 +5282,22 @@
       }
 
     }, {
-      "../orb.filtering": 6,
-      "../orb.utils": 19,
-      "../orb.utils.dom": 18,
-      "./orb.react.Dropdown.jsx": 26,
+      "../orb.filtering": 40,
+      "../orb.utils": 53,
+      "../orb.utils.dom": 52,
+      "./orb.react.Dropdown.jsx": 60,
       "react": "react",
       "react-dom": "react-dom"
     }],
-    28: [function(_dereq_, module, exports) {
+    62: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
+      var React = _dereq_('react'),
         utils = _dereq_('../orb.utils');
 
       module.exports = React.createClass({
         displayName: 'exports',
 
-        render: function() {
+        render: function render() {
           var data = this.props.data;
           var headers = this.props.headers;
           var tableClasses = this.props.theme.getGridClasses();
@@ -4698,13 +5369,13 @@
       });
 
     }, {
-      "../orb.utils": 19,
+      "../orb.utils": 53,
       "react": "react"
     }],
-    29: [function(_dereq_, module, exports) {
+    63: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
-        ReactDOM = typeof window === 'undefined' ? _dereq_('react-dom') : window.ReactDOM,
+      var React = _dereq_('react'),
+        ReactDOM = _dereq_('react-dom'),
         FilterPanel = _dereq_('./orb.react.FilterPanel.jsx'),
         DragManager = _dereq_('./orb.react.DragManager.jsx'),
         utils = _dereq_('../orb.utils'),
@@ -4714,7 +5385,7 @@
 
       module.exports = React.createClass({
         displayName: 'PivotButton',
-        getInitialState: function() {
+        getInitialState: function getInitialState() {
           this.pbid = ++pbid;
 
           // initial state, all zero.
@@ -4731,7 +5402,7 @@
             dragging: false
           };
         },
-        onFilterMouseDown: function(e) {
+        onFilterMouseDown: function onFilterMouseDown(e) {
           // left mouse button only
           if (e.button !== 0) return;
 
@@ -4756,7 +5427,7 @@
           utils.stopPropagation(e);
           utils.preventDefault(e);
         },
-        componentDidUpdate: function() {
+        componentDidUpdate: function componentDidUpdate() {
           if (this.props.pivotTableComp.pgrid.config.canMoveFields) {
             if (!this.state.mousedown) {
               // mouse not down, don't care about mouse up/move events.
@@ -4769,14 +5440,14 @@
             }
           }
         },
-        componentDidMount: function() {
+        componentDidMount: function componentDidMount() {
           this.props.pivotTableComp.registerThemeChanged(this.updateClasses);
         },
-        componentWillUnmount: function() {
+        componentWillUnmount: function componentWillUnmount() {
           this.props.pivotTableComp.unregisterThemeChanged(this.updateClasses);
           utils.removeEventListener(document, 'mousemove', this.onMouseMove);
         },
-        onMouseDown: function(e) {
+        onMouseDown: function onMouseDown(e) {
           // drag/sort with left mouse button
           if (e.button !== 0) return;
 
@@ -4805,7 +5476,7 @@
           utils.stopPropagation(e);
           utils.preventDefault(e);
         },
-        onMouseUp: function(e) {
+        onMouseUp: function onMouseUp(e) {
 
           var isdragged = this.state.dragging;
 
@@ -4824,7 +5495,7 @@
             this.props.pivotTableComp.sort(this.props.axetype, this.props.field);
           }
         },
-        onMouseMove: function(e) {
+        onMouseMove: function onMouseMove(e) {
           // if the mouse is not down while moving, return (no drag)
           if (!this.props.pivotTableComp.pgrid.config.canMoveFields || !this.state.mousedown) return;
 
@@ -4855,10 +5526,10 @@
           utils.stopPropagation(e);
           utils.preventDefault(e);
         },
-        updateClasses: function() {
+        updateClasses: function updateClasses() {
           ReactDOM.findDOMNode(this).className = this.props.pivotTableComp.pgrid.config.theme.getButtonClasses().pivotButton;
         },
-        render: function() {
+        render: function render() {
           var self = this;
           var divstyle = {
             left: self.state.pos.x + 'px',
@@ -4935,18 +5606,18 @@
       });
 
     }, {
-      "../orb.axe": 2,
-      "../orb.utils": 19,
-      "../orb.utils.dom": 18,
-      "./orb.react.DragManager.jsx": 22,
-      "./orb.react.FilterPanel.jsx": 27,
+      "../orb.axe": 36,
+      "../orb.utils": 53,
+      "../orb.utils.dom": 52,
+      "./orb.react.DragManager.jsx": 56,
+      "./orb.react.FilterPanel.jsx": 61,
       "react": "react",
       "react-dom": "react-dom"
     }],
-    30: [function(_dereq_, module, exports) {
+    64: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
-        ReactDOM = typeof window === 'undefined' ? _dereq_('react-dom') : window.ReactDOM,
+      var React = _dereq_('react'),
+        ReactDOM = _dereq_('react-dom'),
         uiheaders = _dereq_('../orb.ui.header'),
         domUtils = _dereq_('../orb.utils.dom'),
         _paddingLeft = null,
@@ -4955,13 +5626,13 @@
       module.exports = React.createClass({
         displayName: 'exports',
 
-        expand: function() {
+        expand: function expand() {
           this.props.pivotTableComp.pgridwidget.expandRow(this.props.cell);
         },
-        collapse: function() {
+        collapse: function collapse() {
           this.props.pivotTableComp.pgridwidget.collapseRow(this.props.cell);
         },
-        updateCellInfos: function() {
+        updateCellInfos: function updateCellInfos() {
           var node = ReactDOM.findDOMNode(this);
           var cell = this.props.cell;
           node.__orb = node.__orb || {};
@@ -5012,20 +5683,20 @@
             node.__orb._borderRightWidth = 0;
           }
         },
-        componentDidMount: function() {
+        componentDidMount: function componentDidMount() {
           this.updateCellInfos();
         },
-        componentDidUpdate: function() {
+        componentDidUpdate: function componentDidUpdate() {
           this.updateCellInfos();
         },
-        shouldComponentUpdate: function(nextProps, nextState) {
+        shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
           if (nextProps.cell && nextProps.cell == this.props.cell && !this._latestVisibleState && !nextProps.cell.visible()) {
             return false;
           }
           return true;
         },
         _latestVisibleState: false,
-        render: function() {
+        render: function render() {
           var self = this;
           var cell = this.props.cell;
           var divcontent = [];
@@ -5085,7 +5756,7 @@
               break;
             case 'cell-template-datavalue':
               value = cell.datafield && cell.datafield.formatFunc ? cell.datafield.formatFunc()(cell.value) : cell.value;
-              cellClick = function() {
+              cellClick = function cellClick() {
                 self.props.pivotTableComp.pgridwidget.drilldown(cell, self.props.pivotTableComp.id);
               };
               break;
@@ -5167,15 +5838,15 @@
       }
 
     }, {
-      "../orb.ui.header": 15,
-      "../orb.utils.dom": 18,
+      "../orb.ui.header": 49,
+      "../orb.utils.dom": 52,
       "react": "react",
       "react-dom": "react-dom"
     }],
-    31: [function(_dereq_, module, exports) {
+    65: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
-        ReactDOM = typeof window === 'undefined' ? _dereq_('react-dom') : window.ReactDOM,
+      var React = _dereq_('react'),
+        ReactDOM = _dereq_('react-dom'),
         DragManager = _dereq_('./orb.react.DragManager.jsx'),
         SizingManager = _dereq_('./orb.react.PivotTable.SizingManager.jsx'),
         Toolbar = _dereq_('./orb.react.Toolbar.jsx'),
@@ -5194,7 +5865,7 @@
         pgrid: null,
         pgridwidget: null,
         fontStyle: null,
-        getInitialState: function() {
+        getInitialState: function getInitialState() {
           DragManager.init(this);
 
           themeChangeCallbacks[this.id] = [];
@@ -5204,27 +5875,27 @@
           this.pgrid = this.pgridwidget.pgrid;
           return {};
         },
-        sort: function(axetype, field) {
+        sort: function sort(axetype, field) {
           this.pgridwidget.sort(axetype, field);
         },
-        moveButton: function(button, newAxeType, position) {
+        moveButton: function moveButton(button, newAxeType, position) {
           this.pgridwidget.moveField(button.props.field.name, button.props.axetype, newAxeType, position);
         },
-        applyFilter: function(fieldname, operator, term, staticValue, excludeStatic) {
+        applyFilter: function applyFilter(fieldname, operator, term, staticValue, excludeStatic) {
           this.pgridwidget.applyFilter(fieldname, operator, term, staticValue, excludeStatic);
         },
-        registerThemeChanged: function(compCallback) {
+        registerThemeChanged: function registerThemeChanged(compCallback) {
           if (compCallback) {
             themeChangeCallbacks[this.id].push(compCallback);
           }
         },
-        unregisterThemeChanged: function(compCallback) {
+        unregisterThemeChanged: function unregisterThemeChanged(compCallback) {
           var i;
           if (compCallback && (i = themeChangeCallbacks[this.id].indexOf(compCallback)) >= 0) {
             themeChangeCallbacks[this.id].splice(i, 1);
           }
         },
-        changeTheme: function(newTheme) {
+        changeTheme: function changeTheme(newTheme) {
           if (this.pgridwidget.pgrid.config.setTheme(newTheme)) {
             // notify self/sub-components of the theme change
             for (var i = 0; i < themeChangeCallbacks[this.id].length; i++) {
@@ -5232,16 +5903,16 @@
             }
           }
         },
-        updateClasses: function() {
+        updateClasses: function updateClasses() {
           var thisnode = ReactDOM.findDOMNode(this);
           var classes = this.pgridwidget.pgrid.config.theme.getPivotClasses();
           thisnode.className = classes.container;
           thisnode.children[1].className = classes.table;
         },
-        componentDidUpdate: function() {
+        componentDidUpdate: function componentDidUpdate() {
           this.synchronizeWidths();
         },
-        componentDidMount: function() {
+        componentDidMount: function componentDidMount() {
           var fontInfos = domUtils.getStyle(ReactDOM.findDOMNode(this), ['font-family', 'font-size'], true);
           this.fontStyle = {
             fontFamily: fontInfos[0],
@@ -5250,7 +5921,7 @@
 
           this.synchronizeWidths();
         },
-        synchronizeWidths: function() {
+        synchronizeWidths: function synchronizeWidths() {
           var chartStyle = SizingManager.synchronizeWidths(this);
           chartStyle.fontFamily = this.fontStyle.fontFamily;
           chartStyle.fontSize = this.fontStyle.fontSize;
@@ -5260,7 +5931,7 @@
             chartStyle: chartStyle
           });
         },
-        render: function() {
+        render: function render() {
 
           var self = this;
 
@@ -5360,27 +6031,27 @@
       });
 
     }, {
-      "../orb.utils.dom": 18,
-      "./orb.react.Chart.jsx": 20,
-      "./orb.react.DragManager.jsx": 22,
-      "./orb.react.PivotTable.ColumnButtons.jsx": 33,
-      "./orb.react.PivotTable.RowButtons.jsx": 36,
-      "./orb.react.PivotTable.SizingManager.jsx": 38,
-      "./orb.react.PivotTable.UpperButtons.jsx": 39,
-      "./orb.react.Toolbar.jsx": 42,
+      "../orb.utils.dom": 52,
+      "./orb.react.Chart.jsx": 54,
+      "./orb.react.DragManager.jsx": 56,
+      "./orb.react.PivotTable.ColumnButtons.jsx": 67,
+      "./orb.react.PivotTable.RowButtons.jsx": 70,
+      "./orb.react.PivotTable.SizingManager.jsx": 72,
+      "./orb.react.PivotTable.UpperButtons.jsx": 73,
+      "./orb.react.Toolbar.jsx": 76,
       "react": "react",
       "react-dom": "react-dom"
     }],
-    32: [function(_dereq_, module, exports) {
+    66: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
+      var React = _dereq_('react'),
         PivotCell = _dereq_('./orb.react.PivotCell.jsx'),
         axe = _dereq_('../orb.axe');
 
       module.exports = React.createClass({
         displayName: 'exports',
 
-        render: function() {
+        render: function render() {
           var self = this;
 
           var lastCellIndex = this.props.row.length - 1;
@@ -5441,13 +6112,13 @@
       });
 
     }, {
-      "../orb.axe": 2,
-      "./orb.react.PivotCell.jsx": 30,
+      "../orb.axe": 36,
+      "./orb.react.PivotCell.jsx": 64,
       "react": "react"
     }],
-    33: [function(_dereq_, module, exports) {
+    67: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
+      var React = _dereq_('react'),
         axe = _dereq_('../orb.axe'),
         PivotButton = _dereq_('./orb.react.PivotButton.jsx'),
         DropTarget = _dereq_('./orb.react.DropTarget.jsx');
@@ -5455,7 +6126,7 @@
       module.exports = React.createClass({
         displayName: 'exports',
 
-        render: function() {
+        render: function render() {
           var self = this;
           var config = this.props.pivotTableComp.pgridwidget.pgrid.config;
 
@@ -5477,21 +6148,21 @@
       });
 
     }, {
-      "../orb.axe": 2,
-      "./orb.react.DropTarget.jsx": 24,
-      "./orb.react.PivotButton.jsx": 29,
+      "../orb.axe": 36,
+      "./orb.react.DropTarget.jsx": 58,
+      "./orb.react.PivotButton.jsx": 63,
       "react": "react"
     }],
-    34: [function(_dereq_, module, exports) {
+    68: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
+      var React = _dereq_('react'),
         axe = _dereq_('../orb.axe'),
         PivotRow = _dereq_('./orb.react.PivotRow.jsx');
 
       module.exports = React.createClass({
         displayName: 'exports',
 
-        render: function() {
+        render: function render() {
           var self = this;
           var pgridwidget = this.props.pivotTableComp.pgridwidget;
           var cntrClass = pgridwidget.columns.headers.length === 0 ? '' : ' columns-cntr';
@@ -5532,20 +6203,20 @@
       });
 
     }, {
-      "../orb.axe": 2,
-      "./orb.react.PivotRow.jsx": 32,
+      "../orb.axe": 36,
+      "./orb.react.PivotRow.jsx": 66,
       "react": "react"
     }],
-    35: [function(_dereq_, module, exports) {
+    69: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
+      var React = _dereq_('react'),
         axe = _dereq_('../orb.axe'),
         PivotRow = _dereq_('./orb.react.PivotRow.jsx');
 
       module.exports = React.createClass({
         displayName: 'exports',
 
-        render: function() {
+        render: function render() {
           var self = this;
           var pgridwidget = this.props.pivotTableComp.pgridwidget;
           var layoutInfos = {
@@ -5584,13 +6255,13 @@
       });
 
     }, {
-      "../orb.axe": 2,
-      "./orb.react.PivotRow.jsx": 32,
+      "../orb.axe": 36,
+      "./orb.react.PivotRow.jsx": 66,
       "react": "react"
     }],
-    36: [function(_dereq_, module, exports) {
+    70: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
+      var React = _dereq_('react'),
         PivotButton = _dereq_('./orb.react.PivotButton.jsx'),
         DropTarget = _dereq_('./orb.react.DropTarget.jsx'),
         DropTargetVertical = _dereq_('./orb.react.DropTargetVertical.jsx'),
@@ -5599,7 +6270,7 @@
       module.exports = React.createClass({
         displayName: 'exports',
 
-        render: function() {
+        render: function render() {
           var self = this;
           var config = this.props.pivotTableComp.pgridwidget.pgrid.config;
 
@@ -5628,23 +6299,23 @@
       });
 
     }, {
-      "../orb.axe": 2,
-      "./orb.react.DropTarget.jsx": 24,
-      "./orb.react.DropTargetVertical.jsx": 25,
-      "./orb.react.PivotButton.jsx": 29,
+      "../orb.axe": 36,
+      "./orb.react.DropTarget.jsx": 58,
+      "./orb.react.DropTargetVertical.jsx": 59,
+      "./orb.react.PivotButton.jsx": 63,
       "react": "react"
     }],
-    37: [function(_dereq_, module, exports) {
+    71: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
-        ReactDOM = typeof window === 'undefined' ? _dereq_('react-dom') : window.ReactDOM,
+      var React = _dereq_('react'),
+        ReactDOM = _dereq_('react-dom'),
         PivotRow = _dereq_('./orb.react.PivotRow.jsx'),
         axe = _dereq_('../orb.axe');
 
       module.exports = React.createClass({
         displayName: 'exports',
 
-        setColGroup: function(widths) {
+        setColGroup: function setColGroup(widths) {
           var node = ReactDOM.findDOMNode(this);
           var colGroupNode = this.refs.colgroup;
           node.style.tableLayout = 'auto';
@@ -5657,7 +6328,7 @@
           }
           node.style.tableLayout = 'fixed';
         },
-        render: function() {
+        render: function render() {
           var self = this;
           var pgridwidget = this.props.pivotTableComp.pgridwidget;
           var cntrClass = pgridwidget.rows.headers.length === 0 ? '' : ' rows-cntr';
@@ -5700,25 +6371,25 @@
       });
 
     }, {
-      "../orb.axe": 2,
-      "./orb.react.PivotRow.jsx": 32,
+      "../orb.axe": 36,
+      "./orb.react.PivotRow.jsx": 66,
       "react": "react",
       "react-dom": "react-dom"
     }],
-    38: [function(_dereq_, module, exports) {
+    72: [function(_dereq_, module, exports) {
 
-      var ReactDOM = typeof window === 'undefined' ? _dereq_('react-dom') : window.ReactDOM,
+      var ReactDOM = _dereq_('react-dom'),
         domUtils = _dereq_('../orb.utils.dom');
 
       var SizingManager = module.exports = {
-        synchronizeWidths: function(pivotComp) {
+        synchronizeWidths: function synchronizeWidths(pivotComp) {
           if (pivotComp.pgridwidget.pgrid.config.chartMode.enabled) {
             return SizingManager.synchronizePivotChartWidths(pivotComp);
           } else {
             SizingManager.synchronizePivotTableWidths(pivotComp);
           }
         },
-        synchronizePivotChartWidths: function(pivotComp) {
+        synchronizePivotChartWidths: function synchronizePivotChartWidths(pivotComp) {
           var pivotWrapperTable = pivotComp.refs.pivotWrapperTable,
             pivot = new ComponentSizeInfo(pivotComp.refs.pivot),
             topBtns = new ComponentSizeInfo(pivotComp.refs.upperButtons),
@@ -5738,7 +6409,7 @@
             height: chartHeight
           };
         },
-        synchronizePivotTableWidths: function(pivotComp) {
+        synchronizePivotTableWidths: function synchronizePivotTableWidths(pivotComp) {
 
           var pivotWrapperTable = pivotComp.refs.pivotWrapperTable,
             pivot = new ComponentSizeInfo(pivotComp.refs.pivot),
@@ -5992,12 +6663,12 @@
       }
 
     }, {
-      "../orb.utils.dom": 18,
+      "../orb.utils.dom": 52,
       "react-dom": "react-dom"
     }],
-    39: [function(_dereq_, module, exports) {
+    73: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
+      var React = _dereq_('react'),
         PivotButton = _dereq_('./orb.react.PivotButton.jsx'),
         DropTarget = _dereq_('./orb.react.DropTarget.jsx'),
         axe = _dereq_('../orb.axe');
@@ -6005,7 +6676,7 @@
       module.exports = React.createClass({
         displayName: 'exports',
 
-        render: function() {
+        render: function render() {
           var self = this;
           var config = this.props.pivotTableComp.pgridwidget.pgrid.config;
 
@@ -6096,15 +6767,15 @@
       });
 
     }, {
-      "../orb.axe": 2,
-      "./orb.react.DropTarget.jsx": 24,
-      "./orb.react.PivotButton.jsx": 29,
+      "../orb.axe": 36,
+      "./orb.react.DropTarget.jsx": 58,
+      "./orb.react.PivotButton.jsx": 63,
       "react": "react"
     }],
-    40: [function(_dereq_, module, exports) {
+    74: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
-        ReactDOM = typeof window === 'undefined' ? _dereq_('react-dom') : window.ReactDOM,
+      var React = _dereq_('react'),
+        ReactDOM = _dereq_('react-dom'),
         DragManager = _dereq_('./orb.react.DragManager.jsx'),
         SizingManager = _dereq_('./orb.react.PivotTable.SizingManager.jsx'),
         Toolbar = _dereq_('./orb.react.Toolbar.jsx'),
@@ -6129,7 +6800,7 @@
         pgrid: null,
         pgridwidget: null,
         fontStyle: null,
-        getInitialState: function() {
+        getInitialState: function getInitialState() {
           DragManager.init(this);
 
           themeChangeCallbacks[this.id] = [];
@@ -6139,33 +6810,33 @@
           this.pgrid = this.pgridwidget.pgrid;
           return {};
         },
-        sort: function(axetype, field) {
+        sort: function sort(axetype, field) {
           this.pgridwidget.sort(axetype, field);
         },
-        moveButton: function(button, newAxeType, position) {
+        moveButton: function moveButton(button, newAxeType, position) {
           this.pgridwidget.moveField(button.props.field.name, button.props.axetype, newAxeType, position);
         },
-        toggleSubtotals: function(axetype) {
+        toggleSubtotals: function toggleSubtotals(axetype) {
           this.pgridwidget.toggleSubtotals(axetype);
         },
-        toggleGrandtotal: function(axetype) {
+        toggleGrandtotal: function toggleGrandtotal(axetype) {
           this.pgridwidget.toggleGrandtotal(axetype);
         },
-        applyFilter: function(fieldname, operator, term, staticValue, excludeStatic) {
+        applyFilter: function applyFilter(fieldname, operator, term, staticValue, excludeStatic) {
           this.pgridwidget.applyFilter(fieldname, operator, term, staticValue, excludeStatic);
         },
-        registerThemeChanged: function(compCallback) {
+        registerThemeChanged: function registerThemeChanged(compCallback) {
           if (compCallback) {
             themeChangeCallbacks[this.id].push(compCallback);
           }
         },
-        unregisterThemeChanged: function(compCallback) {
+        unregisterThemeChanged: function unregisterThemeChanged(compCallback) {
           var i;
           if (compCallback && (i = themeChangeCallbacks[this.id].indexOf(compCallback)) >= 0) {
             themeChangeCallbacks[this.id].splice(i, 1);
           }
         },
-        changeTheme: function(newTheme) {
+        changeTheme: function changeTheme(newTheme) {
           if (this.pgridwidget.pgrid.config.setTheme(newTheme)) {
             // notify self/sub-components of the theme change
             for (var i = 0; i < themeChangeCallbacks[this.id].length; i++) {
@@ -6173,16 +6844,16 @@
             }
           }
         },
-        updateClasses: function() {
+        updateClasses: function updateClasses() {
           var thisnode = ReactDOM.findDOMNode(this);
           var classes = this.pgridwidget.pgrid.config.theme.getPivotClasses();
           thisnode.className = classes.container;
           thisnode.children[1].className = classes.table;
         },
-        componentDidUpdate: function() {
+        componentDidUpdate: function componentDidUpdate() {
           this.synchronizeWidths();
         },
-        componentDidMount: function() {
+        componentDidMount: function componentDidMount() {
           var fontInfos = domUtils.getStyle(ReactDOM.findDOMNode(this), ['font-family', 'font-size'], true);
           this.fontStyle = {
             fontFamily: fontInfos[0],
@@ -6208,7 +6879,7 @@
 
           this.synchronizeWidths();
         },
-        onWheel: function(e) {
+        onWheel: function onWheel(e) {
           var elem;
           var scrollbar;
           var amount;
@@ -6226,12 +6897,12 @@
             utils.preventDefault(e);
           }
         },
-        synchronizeWidths: function() {
+        synchronizeWidths: function synchronizeWidths() {
           SizingManager.synchronizeWidths(this);
           this.refs.horizontalScrollBar.refresh();
           this.refs.verticalScrollBar.refresh();
         },
-        render: function() {
+        render: function render() {
 
           var self = this;
 
@@ -6403,32 +7074,32 @@
       });
 
     }, {
-      "../orb.utils": 19,
-      "../orb.utils.dom": 18,
-      "./orb.react.DragManager.jsx": 22,
-      "./orb.react.PivotTable.ColumnButtons.jsx": 33,
-      "./orb.react.PivotTable.ColumnHeaders.jsx": 34,
-      "./orb.react.PivotTable.DataCells.jsx": 35,
-      "./orb.react.PivotTable.RowButtons.jsx": 36,
-      "./orb.react.PivotTable.RowHeaders.jsx": 37,
-      "./orb.react.PivotTable.SizingManager.jsx": 38,
-      "./orb.react.PivotTable.UpperButtons.jsx": 39,
-      "./orb.react.ScrollBars.jsx": 41,
-      "./orb.react.Toolbar.jsx": 42,
+      "../orb.utils": 53,
+      "../orb.utils.dom": 52,
+      "./orb.react.DragManager.jsx": 56,
+      "./orb.react.PivotTable.ColumnButtons.jsx": 67,
+      "./orb.react.PivotTable.ColumnHeaders.jsx": 68,
+      "./orb.react.PivotTable.DataCells.jsx": 69,
+      "./orb.react.PivotTable.RowButtons.jsx": 70,
+      "./orb.react.PivotTable.RowHeaders.jsx": 71,
+      "./orb.react.PivotTable.SizingManager.jsx": 72,
+      "./orb.react.PivotTable.UpperButtons.jsx": 73,
+      "./orb.react.ScrollBars.jsx": 75,
+      "./orb.react.Toolbar.jsx": 76,
       "react": "react",
       "react-dom": "react-dom"
     }],
-    41: [function(_dereq_, module, exports) {
+    75: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
-        ReactDOM = typeof window === 'undefined' ? _dereq_('react-dom') : window.ReactDOM,
+      var React = _dereq_('react'),
+        ReactDOM = _dereq_('react-dom'),
         utils = _dereq_('../orb.utils'),
         domUtils = _dereq_('../orb.utils.dom');
 
       var scrollBarMixin = {
         scrollEvent: null,
         scrollClient: null,
-        getInitialState: function() {
+        getInitialState: function getInitialState() {
           // initial state, all zero.
           return {
             size: 16,
@@ -6436,10 +7107,10 @@
             thumbOffset: 0
           };
         },
-        componentDidMount: function() {
+        componentDidMount: function componentDidMount() {
           this.scrollEvent = new ScrollEvent(this);
         },
-        componentDidUpdate: function() {
+        componentDidUpdate: function componentDidUpdate() {
           if (!this.state.mousedown) {
             // mouse not down, don't care about mouse up/move events.
             utils.removeEventListener(document, 'mousemove', this.onMouseMove);
@@ -6450,11 +7121,11 @@
             utils.addEventListener(document, 'mouseup', this.onMouseUp);
           }
         },
-        componentWillUnmount: function() {
+        componentWillUnmount: function componentWillUnmount() {
           utils.removeEventListener(document, 'mousemove', this.onMouseMove);
           utils.removeEventListener(document, 'mouseup', this.onMouseUp);
         },
-        onMouseDown: function(e) {
+        onMouseDown: function onMouseDown(e) {
           // drag with left mouse button
           if (e.button !== 0) return;
 
@@ -6475,7 +7146,7 @@
           utils.stopPropagation(e);
           utils.preventDefault(e);
         },
-        onMouseUp: function() {
+        onMouseUp: function onMouseUp() {
 
           if (this.state.mousedown) {
             var thumbElem = this.refs.scrollThumb;
@@ -6486,7 +7157,7 @@
             mousedown: false
           });
         },
-        onMouseMove: function(e) {
+        onMouseMove: function onMouseMove(e) {
 
           // if the mouse is not down while moving, return (no drag)
           if (!this.state.mousedown) return;
@@ -6500,22 +7171,22 @@
 
           this.scroll(amount);
         },
-        getScrollSize: function() {
+        getScrollSize: function getScrollSize() {
           if (this.scrollClient != null) {
             return domUtils.getSize(this.scrollClient)[this.sizeProp];
           } else {
             return domUtils.getSize(ReactDOM.findDOMNode(this))[this.sizeProp];
           }
         },
-        setScrollClient: function(scrollClient, scrollCallback) {
+        setScrollClient: function setScrollClient(scrollClient, scrollCallback) {
           this.scrollClient = scrollClient;
           this.scrollEvent.callback = scrollCallback;
         },
-        getScrollPercent: function() {
+        getScrollPercent: function getScrollPercent() {
           var maxOffset = this.getScrollSize() - this.state.size;
           return maxOffset <= 0 ? 0 : this.state.thumbOffset / maxOffset;
         },
-        refresh: function() {
+        refresh: function refresh() {
           if (this.scrollClient) {
             var scrolledElement = this.scrollClient.children[0];
 
@@ -6532,7 +7203,7 @@
             }, this.scrollEvent.raise);
           }
         },
-        scroll: function(amount, mode) {
+        scroll: function scroll(amount, mode) {
           if (this.state.size > 0) {
             if (mode == 1) amount *= 8;
 
@@ -6550,12 +7221,12 @@
           }
           return false;
         },
-        onWheel: function(e) {
+        onWheel: function onWheel(e) {
           this.scroll(e.deltaY, e.deltaMode);
           utils.stopPropagation(e);
           utils.preventDefault(e);
         },
-        render: function() {
+        render: function render() {
           var self = this;
 
           var thumbStyle = {
@@ -6621,14 +7292,14 @@
       });
 
     }, {
-      "../orb.utils": 19,
-      "../orb.utils.dom": 18,
+      "../orb.utils": 53,
+      "../orb.utils.dom": 52,
       "react": "react",
       "react-dom": "react-dom"
     }],
-    42: [function(_dereq_, module, exports) {
+    76: [function(_dereq_, module, exports) {
 
-      var React = typeof window === 'undefined' ? _dereq_('react') : window.React,
+      var React = _dereq_('react'),
         axe = _dereq_('../orb.axe'),
         domUtils = _dereq_('../orb.utils.dom');
 
@@ -6636,19 +7307,19 @@
         displayName: 'exports',
 
         _toInit: [],
-        componentDidMount: function() {
+        componentDidMount: function componentDidMount() {
           for (var i = 0; i < this._toInit.length; i++) {
             var btn = this._toInit[i];
             btn.init(this.props.pivotTableComp, this.refs[btn.ref]);
           }
         },
-        componentDidUpdate: function() {
+        componentDidUpdate: function componentDidUpdate() {
           for (var i = 0; i < this._toInit.length; i++) {
             var btn = this._toInit[i];
             btn.init(this.props.pivotTableComp, this.refs[btn.ref]);
           }
         },
-        createCallback: function(action) {
+        createCallback: function createCallback(action) {
           if (action != null) {
             var pgridComponent = this.props.pivotTableComp;
             return function(e) {
@@ -6657,7 +7328,7 @@
           }
           return null;
         },
-        render: function() {
+        render: function render() {
 
           var config = this.props.pivotTableComp.pgridwidget.pgrid.config;
 
@@ -6714,7 +7385,7 @@
       var excelExport = _dereq_('../orb.export.excel');
 
       var defaultToolbarConfig = {
-        exportToExcel: function(pgridComponent, button) {
+        exportToExcel: function exportToExcel(pgridComponent, button) {
           var a = document.createElement('a');
           a.download = "orbpivotgrid.xls";
           a.href = excelExport(pgridComponent.props.pgridwidget);
@@ -6722,19 +7393,19 @@
           a.click();
           document.body.removeChild(a);
         },
-        expandAllRows: function(pgridComponent, button) {
+        expandAllRows: function expandAllRows(pgridComponent, button) {
           pgridComponent.pgridwidget.toggleFieldExpansion(axe.Type.ROWS, null, true);
         },
-        collapseAllRows: function(pgridComponent, button) {
+        collapseAllRows: function collapseAllRows(pgridComponent, button) {
           pgridComponent.pgridwidget.toggleFieldExpansion(axe.Type.ROWS, null, false);
         },
-        expandAllColumns: function(pgridComponent, button) {
+        expandAllColumns: function expandAllColumns(pgridComponent, button) {
           pgridComponent.pgridwidget.toggleFieldExpansion(axe.Type.COLUMNS, null, true);
         },
-        collapseAllColumns: function(pgridComponent, button) {
+        collapseAllColumns: function collapseAllColumns(pgridComponent, button) {
           pgridComponent.pgridwidget.toggleFieldExpansion(axe.Type.COLUMNS, null, false);
         },
-        updateSubtotalsButton: function(axetype, pgridComponent, button) {
+        updateSubtotalsButton: function updateSubtotalsButton(axetype, pgridComponent, button) {
           var subTotalsState = pgridComponent.pgridwidget.areSubtotalsVisible(axetype);
           button.style.display = subTotalsState === null ? 'none' : '';
 
@@ -6751,20 +7422,20 @@
           domUtils.removeClass(button, classToRemove);
           domUtils.addClass(button, classToAdd);
         },
-        initSubtotals: function(axetype) {
+        initSubtotals: function initSubtotals(axetype) {
           var self = this;
           return function(pgridComponent, button) {
             self.updateSubtotalsButton(axetype, pgridComponent, button);
           };
         },
-        toggleSubtotals: function(axetype) {
+        toggleSubtotals: function toggleSubtotals(axetype) {
           var self = this;
           return function(pgridComponent, button) {
             pgridComponent.toggleSubtotals(axetype);
             self.updateSubtotalsButton(axetype, pgridComponent, button);
           };
         },
-        updateGrandtotalButton: function(axetype, pgridComponent, button) {
+        updateGrandtotalButton: function updateGrandtotalButton(axetype, pgridComponent, button) {
           var subTotalsState = pgridComponent.pgridwidget.isGrandtotalVisible(axetype);
           button.style.display = subTotalsState === null ? 'none' : '';
 
@@ -6781,13 +7452,13 @@
           domUtils.removeClass(button, classToRemove);
           domUtils.addClass(button, classToAdd);
         },
-        initGrandtotal: function(axetype) {
+        initGrandtotal: function initGrandtotal(axetype) {
           var self = this;
           return function(pgridComponent, button) {
             self.updateGrandtotalButton(axetype, pgridComponent, button);
           };
         },
-        toggleGrandtotal: function(axetype) {
+        toggleGrandtotal: function toggleGrandtotal(axetype) {
           var self = this;
           return function(pgridComponent, button) {
             pgridComponent.toggleGrandtotal(axetype);
@@ -6857,10 +7528,10 @@
       }];
 
     }, {
-      "../orb.axe": 2,
-      "../orb.export.excel": 5,
-      "../orb.utils.dom": 18,
+      "../orb.axe": 36,
+      "../orb.export.excel": 39,
+      "../orb.utils.dom": 52,
       "react": "react"
     }]
-  }, {}, [7])(7)
+  }, {}, [41])(41)
 });
