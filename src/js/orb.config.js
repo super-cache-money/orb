@@ -78,6 +78,10 @@ function createfield(rootconfig, axetype, fieldconfig, defaultfieldconfig) {
 
     var merged = mergefieldconfigs(fieldconfig, fieldAxeconfig, axeconfig, defaultfieldconfig, rootconfig);
 
+    function defaultFormatFunc(val) {
+        return val != null ? val.toString() : '';
+    }
+
     return new Field({
         name: getpropertyvalue('name', merged.configs, ''),
 
@@ -95,7 +99,7 @@ function createfield(rootconfig, axetype, fieldconfig, defaultfieldconfig) {
 
         aggregateFuncName: getpropertyvalue('aggregateFuncName', merged.functions, 'sum'),
         aggregateFunc: getpropertyvalue('aggregateFunc', merged.functions, aggregation.sum),
-        formatFunc: getpropertyvalue('formatFunc', merged.functions, null)
+        formatFunc: getpropertyvalue('formatFunc', merged.functions, defaultFormatFunc)
     }, false);
 }
 
@@ -133,7 +137,7 @@ function ChartConfig(options) {
 
     this.enabled = options.enabled || false;
     // type can be: 'LineChart', 'AreaChart', 'ColumnChart', 'BarChart', 'SteppedAreaChart'
-    this.type = options.type || 'LineChart';    
+    this.type = options.type || 'LineChart';
 }
 
 var Field = module.exports.field = function(options, createSubOptions) {
@@ -154,10 +158,6 @@ var Field = module.exports.field = function(options, createSubOptions) {
     var _aggregatefunc;
     var _formatfunc;
 
-    function defaultFormatFunc(val) {   
-        return val != null ? val.toString() : '';
-    }
-
     this.aggregateFunc = function(func) {
         if (func) {
             _aggregatefunc = aggregation.toAggregateFunc(func);
@@ -174,7 +174,7 @@ var Field = module.exports.field = function(options, createSubOptions) {
         }
     };
 
-    this.aggregateFuncName = options.aggregateFuncName || 
+    this.aggregateFuncName = options.aggregateFuncName ||
         (options.aggregateFunc ?
             (utils.isString(options.aggregateFunc) ?
                 options.aggregateFunc :
@@ -182,7 +182,7 @@ var Field = module.exports.field = function(options, createSubOptions) {
             null);
 
     this.aggregateFunc(options.aggregateFunc);
-    this.formatFunc(options.formatFunc || defaultFormatFunc);
+    this.formatFunc(options.formatFunc);
 
     if (createSubOptions !== false) {
         (this.rowSettings = new Field(options.rowSettings, false)).name = this.name;
@@ -224,7 +224,7 @@ module.exports.config = function(config) {
     this.dataSourceFieldCaptions = [];
 
     this.captionToName = function(caption) {
-        var fcaptionIndex = self.dataSourceFieldCaptions.indexOf(caption);        
+        var fcaptionIndex = self.dataSourceFieldCaptions.indexOf(caption);
         return fcaptionIndex >= 0 ? self.dataSourceFieldNames[fcaptionIndex] : caption;
     };
 
@@ -413,9 +413,9 @@ module.exports.config = function(config) {
                 }
 
                 var field = createfield(
-                    self, 
-                    newaxetype, 
-                    fieldConfig, 
+                    self,
+                    newaxetype,
+                    fieldConfig,
                     defaultFieldConfig);
 
                 if(!newAxeSubtotalsState && field.subTotal.visible !== false) {
@@ -453,7 +453,7 @@ module.exports.config = function(config) {
         } else {
             return false;
         }
-        
+
         newState = newState === false ? null : true;
         for(i = 0; i < axeFields.length; i++) {
             if(axeFields[i].subTotal.visible !== false) {
