@@ -165,12 +165,12 @@ module.exports = React.createClass({
           <col ref="column4"></col>
         </colgroup>
         <tbody>
-          <tr ref="upperButtons">
+          <tr ref="upperButtons" className='orb-upper-buttons'>
             <td colSpan="4">
               <UpperButtons pivotTableComp={self}></UpperButtons>
             </td>
           </tr>
-          <tr ref="colButtons">
+          <tr ref="colButtons" className='orb-column-buttons'>
             <td></td>
             <td style={{padding: '11px 4px !important'}}>
               <ColumnButtons pivotTableComp={self}></ColumnButtons>
