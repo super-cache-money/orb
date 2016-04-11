@@ -1048,6 +1048,10 @@
 
         var merged = mergefieldconfigs(fieldconfig, fieldAxeconfig, axeconfig, defaultfieldconfig, rootconfig);
 
+        function defaultFormatFunc(val) {
+          return val != null ? val.toString() : '';
+        }
+
         return new Field({
           name: getpropertyvalue('name', merged.configs, ''),
 
@@ -1065,7 +1069,7 @@
 
           aggregateFuncName: getpropertyvalue('aggregateFuncName', merged.functions, 'sum'),
           aggregateFunc: getpropertyvalue('aggregateFunc', merged.functions, aggregation.sum),
-          formatFunc: getpropertyvalue('formatFunc', merged.functions, null)
+          formatFunc: getpropertyvalue('formatFunc', merged.functions, defaultFormatFunc)
         }, false);
       }
 
@@ -1124,10 +1128,6 @@
         var _aggregatefunc;
         var _formatfunc;
 
-        function defaultFormatFunc(val) {
-          return val != null ? val.toString() : '';
-        }
-
         this.aggregateFunc = function(func) {
           if (func) {
             _aggregatefunc = aggregation.toAggregateFunc(func);
@@ -1147,7 +1147,7 @@
         this.aggregateFuncName = options.aggregateFuncName || (options.aggregateFunc ? utils.isString(options.aggregateFunc) ? options.aggregateFunc : 'custom' : null);
 
         this.aggregateFunc(options.aggregateFunc);
-        this.formatFunc(options.formatFunc || defaultFormatFunc);
+        this.formatFunc(options.formatFunc);
 
         if (createSubOptions !== false) {
           (this.rowSettings = new Field(options.rowSettings, false)).name = this.name;
@@ -2595,7 +2595,8 @@
           flower: '#A74AC7',
           gray: '#808080',
           black: '#000000',
-          white: '#FFFFFF'
+          white: '#FFFFFF',
+          rfi: '#9F313A'
         };
 
         themeManager.current = function(newTheme) {
@@ -6962,7 +6963,8 @@
                 null,
                 React.createElement(
                   'tr', {
-                    ref: 'upperButtons'
+                    ref: 'upperButtons',
+                    className: 'orb-upper-buttons'
                   },
                   React.createElement(
                     'td', {
@@ -6975,7 +6977,8 @@
                 ),
                 React.createElement(
                   'tr', {
-                    ref: 'colButtons'
+                    ref: 'colButtons',
+                    className: 'orb-column-buttons'
                   },
                   React.createElement('td', null),
                   React.createElement(
