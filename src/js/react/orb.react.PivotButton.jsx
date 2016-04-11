@@ -189,7 +189,7 @@ module.exports = React.createClass({
 		            			<td className="caption">{self.props.field.caption}{fieldAggFunc}</td>
 		            			<td><div className={'sort-indicator ' + sortDirectionClass}></div></td>
 		            			<td className="filter">
-		            				<div ref="filterButton" className={filterClass} onMouseDown={self.state.dragging ? null : this.onFilterMouseDown}></div>
+		            				<div ref="filterButton" className={filterClass} onClick={self.state.dragging ? null : this.onFilterMouseDown}></div>
 		            			</td>
 		            		</tr>
 		            	</tbody>
