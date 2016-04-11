@@ -19,7 +19,7 @@
     "aggregation",
     "dimension"
   ],
-  "main": "dist/orb.js",
+  "main": "src/js/orb.js",
   "files": [
     "README.md",
     "LICENCE",
