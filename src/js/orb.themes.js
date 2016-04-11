@@ -20,7 +20,8 @@ module.exports = (function() {
         flower: '#A74AC7',
         gray: '#808080',
         black: '#000000',
-        white: '#FFFFFF'
+        white: '#FFFFFF',
+        rfi: '#9F313A'
     };
 
     themeManager.current = function(newTheme) {
