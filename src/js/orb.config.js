@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Pivot Grid axe viewmodel
  * @author Najmeddine Nouri <najmno@gmail.com>
@@ -40,6 +41,7 @@ function mergefieldconfigs() {
         merged.functions.push({
             aggregateFuncName: nnconfig.aggregateFuncName,
             aggregateFunc: i === 0 ? nnconfig.aggregateFunc : (nnconfig.aggregateFunc ? nnconfig.aggregateFunc() : null),
+            styleFunc: i === 0 ? nnconfig.styleFunc : (nnconfig.styleFunc ? nnconfig.styleFunc() : null),
             formatFunc: i === 0 ? nnconfig.formatFunc : (nnconfig.formatFunc ? nnconfig.formatFunc() : null)
         });
     }
@@ -99,7 +101,8 @@ function createfield(rootconfig, axetype, fieldconfig, defaultfieldconfig) {
 
         aggregateFuncName: getpropertyvalue('aggregateFuncName', merged.functions, 'sum'),
         aggregateFunc: getpropertyvalue('aggregateFunc', merged.functions, aggregation.sum),
-        formatFunc: getpropertyvalue('formatFunc', merged.functions, defaultFormatFunc)
+        formatFunc: getpropertyvalue('formatFunc', merged.functions, defaultFormatFunc),
+        styleFunc: getpropertyvalue('styleFunc', merged.functions, null)
     }, false);
 }
 
@@ -157,6 +160,7 @@ var Field = module.exports.field = function(options, createSubOptions) {
     // data settings
     var _aggregatefunc;
     var _formatfunc;
+    var _styleFunc;
 
     this.aggregateFunc = function(func) {
         if (func) {
@@ -174,6 +178,14 @@ var Field = module.exports.field = function(options, createSubOptions) {
         }
     };
 
+    this.styleFunc = function(func) {
+        if (func) {
+            _styleFunc = func;
+        } else {
+            return _styleFunc;
+        }
+    }
+
     this.aggregateFuncName = options.aggregateFuncName ||
         (options.aggregateFunc ?
             (utils.isString(options.aggregateFunc) ?
@@ -183,6 +195,7 @@ var Field = module.exports.field = function(options, createSubOptions) {
 
     this.aggregateFunc(options.aggregateFunc);
     this.formatFunc(options.formatFunc);
+    this.styleFunc(options.styleFunc);
 
     if (createSubOptions !== false) {
         (this.rowSettings = new Field(options.rowSettings, false)).name = this.name;

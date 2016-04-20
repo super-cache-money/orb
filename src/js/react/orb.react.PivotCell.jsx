@@ -1,3 +1,4 @@
+
 /* global module, require, React */
 /*jshint eqnull: true*/
 
@@ -113,6 +114,7 @@ module.exports = React.createClass({
         value = cell.value.caption;
         break;
       case 'cell-template-datavalue':
+          console.log(cell.datafield);
         value = (cell.datafield && cell.datafield.formatFunc) ? cell.datafield.formatFunc()(cell.value) : cell.value;
         cellClick = function() {
           self.props.pivotTableComp.pgridwidget.drilldown(cell, self.props.pivotTableComp.id);
@@ -158,6 +160,10 @@ function getClassname(compProps) {
 
     if(cell.type === uiheaders.HeaderType.SUB_TOTAL && cell.expanded) {
       classname += ' header-st-exp';
+    }
+
+    if(cell.type == uiheaders.HeaderType.DATA_VALUE && cell.datafield && cell.datafield.styleFunc()) {
+        classname += ' ' + cell.datafield.styleFunc()(cell.value);
     }
 
     if(cell.type === uiheaders.HeaderType.GRAND_TOTAL) {
