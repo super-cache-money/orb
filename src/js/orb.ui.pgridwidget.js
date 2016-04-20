@@ -15,6 +15,7 @@ var ReactDOM = require('react-dom'),
     uiheaders = require('./orb.ui.header'),
     uirows = require('./orb.ui.rows'),
     uicols = require('./orb.ui.cols'),
+    PubSub = require('./orb.pubsub'),
 
     Dialog = require('./react/orb.react.Dialog.jsx'),
     PivotChart = require('./react/orb.react.PivotChart.jsx'),
@@ -27,12 +28,15 @@ var ReactDOM = require('react-dom'),
  * @memberOf orb.ui
  * @param  {object} pgrid - pivot grid instance
  */
-module.exports = function(config) {
+var pgridwidget = module.exports = function(config) {
 
     var self = this;
     var renderElement;
     var pivotComponent;
     var dialog = Dialog.create();
+
+    // inherit PubSub
+    PubSub.call(this);
 
     /**
      * Parent pivot grid
@@ -167,6 +171,7 @@ module.exports = function(config) {
             });
 
             pivotComponent = ReactDOM.render(pivottable, renderElement);
+            this.publish(pgridwidget.EVENT_RENDERED);
         }
     };
 
@@ -276,3 +281,7 @@ module.exports = function(config) {
 
     init();
 };
+
+// event raised when the grid is re-rendered
+// (as the grid is re-rendered when it is sorted, filtered etc, this also applies to these events)
+pgridwidget.EVENT_RENDERED = 'pgridwidget:rendered';
