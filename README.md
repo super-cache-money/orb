@@ -29,7 +29,7 @@ Pivot grid javascript library.
 - Data headers location 
 - Grand totals visibility
 - Sub totals visibility &amp; collapsed state 
-- Data cells aggregate &amp; format functions 
+- Data cells aggregate, style &amp; format functions 
 - Theming: built-in & Bootstrap
 
 #### Data query
@@ -89,6 +89,7 @@ q.val({
      Q: 7
    }
 ```
+
 
 
 ## Licence
