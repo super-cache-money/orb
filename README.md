@@ -1,5 +1,5 @@
 # [orb](http://orbjs.net/)[<img align="right" src="https://nodei.co/npm/orb.png?compact=true"/>](https://www.npmjs.com/package/orb)
-Pivot grid javascript library.
+Pivot grid javascript library. Forked from [original](https://github.com/nnajm/orb) while waiting for [collaborator access](https://github.com/nnajm/orb/issues/57#issuecomment-288145753).
 
 **Website:** *[orbjs.net](http://orbjs.net/)*
 
